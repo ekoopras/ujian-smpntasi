@@ -1,0 +1,160 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\UjianResource\Pages;
+use App\Filament\Resources\UjianResource\RelationManagers;
+use App\Models\BankSoal;
+use App\Models\Kelase;
+use App\Models\Mapel;
+use App\Models\Ujian;
+use Filament\Forms;
+use Filament\Forms\Components\MultiSelect;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
+
+
+class UjianResource extends Resource
+{
+    protected static ?string $model = Ujian::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static ?string $navigationGroup = 'Manajemen Ujian';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Select::make('kelase_id')
+                    ->label('Kelas')
+                    ->relationship('kelase', 'kelas') // pastikan field 'nama' ada di tabel kelas
+                    ->required(),
+
+                Forms\Components\Select::make('mapel_id')
+                    ->label('Mapel')
+                    ->options(function () {
+                        // Super admin bisa pilih semua mapel
+                        if (auth()->user()->isSuperAdmin()) {
+                            return \App\Models\Mapel::all()->pluck('mapel', 'id');
+                        }
+                        // Guru otomatis hanya mapel mereka sendiri
+                        return \App\Models\Mapel::where('id', auth()->user()->mapel_id)
+                            ->pluck('mapel', 'id');
+                    })
+                    ->default(function () {
+                        // Set default mapel guru
+                        if (!auth()->user()->isSuperAdmin()) {
+                            return auth()->user()->mapel_id;
+                        }
+                        return null; // super admin default kosong
+                    })
+                    ->required(),
+
+                Forms\Components\TextInput::make('kode_ujian')
+                    ->label('Kode Ujian')
+                    ->disabled() // tidak bisa diubah user
+                    ->dehydrated(false) // jangan kirim ke backend (biar auto generate)
+                    ->default(function () {
+                        return strtoupper(Str::random(6));
+                    })
+                    ->suffixAction(
+                        Forms\Components\Actions\Action::make('generate')
+                            ->icon('heroicon-o-arrow-path')
+                            ->label('Generate')
+                            ->action(function (Forms\Set $set) {
+                                $set('kode_ujian', strtoupper(Str::random(6)));
+                            })
+                    ),
+
+                Forms\Components\TextInput::make('durasi_menit')
+                    ->label('Durasi Ujian (menit)')
+                    ->numeric()
+                    ->default(60)
+                    ->suffix('menit')
+                    ->required(),
+
+                Forms\Components\Select::make('bank_soal_id')
+                    ->label('Bank Soal')
+                    ->searchable()
+                    ->options(function (Get $get) {
+
+                        $query = \App\Models\BankSoal::query();
+
+                        // 🔐 filter berdasarkan role guru
+                        if (!auth()->user()->isSuperAdmin()) {
+                            $query->where('mapel_id', auth()->user()->mapel_id);
+                        }
+
+                        // 🔗 filter berdasarkan mapel yang dipilih di form
+                        if ($get('mapel_id')) {
+                            $query->where('mapel_id', $get('mapel_id'));
+                        }
+
+                        return $query->get()->mapWithKeys(fn($record) => [
+                            $record->id =>
+                            $record->mapel->mapel
+                                . ' | ' . $record->kelas
+                                . ' | Semester ' . $record->semester,
+                        ]);
+                    })
+                    ->required(),
+
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('kelase.kelas')->label('Kelas')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('mapel.mapel')->label('Mapel')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('kode_ujian')->label('Kode Ujian')->copyable(),
+                Tables\Columns\TextColumn::make('durasi_menit')->label('Durasi')->suffix(' menit'),
+                Tables\Columns\TextColumn::make('created_at')->dateTime('d M Y H:i'),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\PesertasRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListUjians::route('/'),
+            //'create' => Pages\CreateUjian::route('/create'),
+            'edit' => Pages\EditUjian::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (auth()->user()->isSuperAdmin()) {
+            return $query; // super admin lihat semua
+        }
+
+        return $query->where('mapel_id', auth()->user()->mapel_id); // guru hanya mapel sendiri
+    }
+}
