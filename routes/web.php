@@ -8,6 +8,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/ujian', [UjianSiswaController::class, 'index']);
-Route::post('/ujian/start', [UjianSiswaController::class, 'start']);
+Route::get('/ujian', [UjianSiswaController::class, 'form']);
+Route::post('/ujian/cek', [UjianSiswaController::class, 'cek']);
+Route::post('/ujian/mulai', [UjianSiswaController::class, 'mulai']);
 Route::post('/ujian/submit', [UjianSiswaController::class, 'submit']);

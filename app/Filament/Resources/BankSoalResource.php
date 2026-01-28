@@ -6,6 +6,7 @@ use App\Filament\Resources\BankSoalResource\Pages;
 use App\Filament\Resources\BankSoalResource\RelationManagers;
 use App\Models\BankSoal;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -26,39 +27,45 @@ class BankSoalResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('mapel_id')
-                    ->label('Mapel')
-                    ->options(function () {
-                        // Super admin bisa pilih semua mapel
-                        if (auth()->user()->isSuperAdmin()) {
-                            return \App\Models\Mapel::all()->pluck('mapel', 'id');
-                        }
-                        // Guru otomatis hanya mapel mereka sendiri
-                        return \App\Models\Mapel::where('id', auth()->user()->mapel_id)
-                            ->pluck('mapel', 'id');
-                    })
-                    ->default(function () {
-                        // Set default mapel guru
-                        if (!auth()->user()->isSuperAdmin()) {
-                            return auth()->user()->mapel_id;
-                        }
-                        return null; // super admin default kosong
-                    })
-                    ->required(),
-                Forms\Components\Select::make('kelas')
-                    ->options([
-                        'Kelas-1' => 'Kelas 1',
-                        'Kelas-2' => 'Kelas 2',
-                        'Kelas-3' => 'Kelas 3',
-                    ])
-                    ->required(),
 
-                Forms\Components\Select::make('semester')
-                    ->options([
-                        '1' => 'Semester 1',
-                        '2' => 'Semester 2',
-                    ])
-                    ->required(),
+                Section::make()
+                    ->schema([
+                        Forms\Components\Select::make('mapel_id')
+                            ->label('Mapel')
+                            ->options(function () {
+                                // Super admin bisa pilih semua mapel
+                                if (auth()->user()->isSuperAdmin()) {
+                                    return \App\Models\Mapel::all()->pluck('mapel', 'id');
+                                }
+                                // Guru otomatis hanya mapel mereka sendiri
+                                return \App\Models\Mapel::where('id', auth()->user()->mapel_id)
+                                    ->pluck('mapel', 'id');
+                            })
+                            ->default(function () {
+                                // Set default mapel guru
+                                if (!auth()->user()->isSuperAdmin()) {
+                                    return auth()->user()->mapel_id;
+                                }
+                                return null; // super admin default kosong
+                            })
+                            ->required(),
+                        Forms\Components\Select::make('kelas')
+                            ->options([
+                                'Kelas-1' => 'Kelas 1',
+                                'Kelas-2' => 'Kelas 2',
+                                'Kelas-3' => 'Kelas 3',
+                            ])
+                            ->required(),
+
+                        Forms\Components\Select::make('semester')
+                            ->options([
+                                '1' => 'Semester 1',
+                                '2' => 'Semester 2',
+                            ])
+                            ->required(),
+                    ])->columns(3),
+
+
             ]);
     }
 
@@ -91,7 +98,11 @@ class BankSoalResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->button(),
+                Tables\Actions\DeleteAction::make()->button(),
+
+
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -7,18 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class Soal extends Model
 {
     protected $fillable = [
-        'ujian_id',
+        'bank_soal_id',
         'soal',
         'gambar',
-        'a',
-        'skor_a',
-        'b',
-        'skor_b',
-        'c',
-        'skor_c',
-        'd',
-        'skor_d',
+        'tipe_soal',
+        'multiple_choice',
+        'matching',
     ];
+
+    protected $casts = [
+        'multiple_choice' => 'array',
+        'matching' => 'array',
+    ];
+
 
     public function bankSoal()
     {

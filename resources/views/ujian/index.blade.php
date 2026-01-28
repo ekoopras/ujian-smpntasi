@@ -12,22 +12,29 @@
             <div class="card-body">
                 <h4 class="mb-4">Masuk Ujian</h4>
 
-                <form method="POST" action="/ujian/start">
+                <form method="POST" action="/ujian/cek">
                     @csrf
 
-                    <input class="form-control mb-3" name="nama" placeholder="Nama Lengkap" required>
-                    <input class="form-control mb-3" name="nis" placeholder="NIS" required>
+                    <label>Nama</label>
+                    <input type="text" name="nama" required>
 
-                    <select class="form-control mb-3" name="kelase_id" required>
+                    <label>NIS</label>
+                    <input type="text" name="nis" required>
+
+                    <label>Kelas</label>
+                    <select name="kelase_id" required>
                         @foreach ($kelas as $k)
                             <option value="{{ $k->id }}">{{ $k->kelas }}</option>
                         @endforeach
                     </select>
 
-                    <input class="form-control mb-3" name="token" placeholder="Token Ujian" required>
+                    <label>Kode Ujian</label>
+                    <input type="text" name="kode_ujian" required>
 
-                    <button class="btn btn-primary w-100">Mulai Ujian</button>
+                    <button type="submit">Lanjut</button>
                 </form>
+
+
             </div>
         </div>
     </div>
