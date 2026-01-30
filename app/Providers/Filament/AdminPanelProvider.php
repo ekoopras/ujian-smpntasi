@@ -29,7 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->breadcrumbs(false)
             ->colors([
-                'primary' => Color::hex('#4945ff'),
+                'primary' => Color::hex('#6f2cf4'),
             ])
             //->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('15rem')

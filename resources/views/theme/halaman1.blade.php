@@ -48,9 +48,9 @@
                                 <label class="form-label fw-semibold" style="font-size: 15px">Kelas</label>
                                 <select name="kelase_id" class="form-select" required>
                                     <option value="">-- Pilih Kelas --</option>
-                                    @foreach ($kelas as $k)
+                                    {{-- @foreach ($kelas as $k)
                                         <option value="{{ $k->id }}">{{ $k->kelas }}</option>
-                                    @endforeach
+                                    @endforeach --}}
                                 </select>
                             </div>
 

@@ -29,37 +29,37 @@
                             @csrf
 
                             {{-- Hidden data --}}
-                            @foreach ($data as $key => $value)
+                            {{-- @foreach ($data as $key => $value)
                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                            @endforeach
-                            <input type="hidden" name="ujian_id" value="{{ $ujian->id }}">
+                            @endforeach --}}
+                            {{-- <input type="hidden" name="ujian_id" value="{{ $ujian->id }}"> --}}
 
                             {{-- Data review --}}
                             <ul class="list-group list-group-flush mb-3">
 
                                 <li class="list-group-item px-0">
                                     <small class="text-muted">Nama</small><br>
-                                    <span class="fw-semibold">{{ $data['nama'] }}</span>
+                                    {{-- <span class="fw-semibold">{{ $data['nama'] }}</span> --}}
                                 </li>
 
                                 <li class="list-group-item px-0">
                                     <small class="text-muted">NIS</small><br>
-                                    <span class="fw-semibold">{{ $data['nis'] }}</span>
+                                    {{-- <span class="fw-semibold">{{ $data['nis'] }}</span> --}}
                                 </li>
 
                                 <li class="list-group-item px-0">
                                     <small class="text-muted">Kelas</small><br>
-                                    <span class="fw-semibold">{{ $ujian->kelase->kelas }}</span>
+                                    {{-- <span class="fw-semibold">{{ $ujian->kelase->kelas }}</span> --}}
                                 </li>
 
                                 <li class="list-group-item px-0">
                                     <small class="text-muted">Mata Pelajaran</small><br>
-                                    <span class="fw-semibold">{{ $ujian->mapel->mapel }}</span>
+                                    {{-- <span class="fw-semibold">{{ $ujian->mapel->mapel }}</span> --}}
                                 </li>
 
                                 <li class="list-group-item px-0">
                                     <small class="text-muted">Durasi Ujian</small><br>
-                                    <span class="fw-semibold">{{ $ujian->durasi_menit }} menit</span>
+                                    {{-- <span class="fw-semibold">{{ $ujian->durasi_menit }} menit</span> --}}
                                 </li>
 
                             </ul>

@@ -223,6 +223,7 @@ class SoalsRelationManager extends RelationManager
              =============================== */
                 TextColumn::make('skor')
                     ->label('Skor')
+                    ->badge()
                     ->state(function ($record) {
                         // MULTIPLE CHOICE
                         if ($record->tipe_soal === 'multiple_choice') {
@@ -249,8 +250,9 @@ class SoalsRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->modalHeading(null), // 🔥 INI KUNCI,
-                Tables\Actions\DeleteAction::make(),
+                    ->modalHeading(null) // 🔥 INI KUNCI,
+                    ->button(),
+                Tables\Actions\DeleteAction::make()->button(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
