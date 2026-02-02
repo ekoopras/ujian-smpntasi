@@ -9,6 +9,7 @@ use App\Models\Peserta;
 use App\Models\Soal;
 use App\Models\Ujian;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class UjianSiswaController extends Controller
 {
@@ -43,7 +44,10 @@ class UjianSiswaController extends Controller
 
         $soals = Soal::where('bank_soal_id', $peserta->ujian->bank_soal_id)->get();
 
-        return view('ujian.soal', compact('peserta', 'soals'));
+        // ambil durasi ujian (menit)
+        $durasiMenit = $peserta->ujian->durasi_menit;
+
+        return view('ujian.soal', compact('peserta', 'soals', 'durasiMenit'));
     }
 
     public function submit(Request $request)
@@ -110,4 +114,45 @@ class UjianSiswaController extends Controller
 
         return $skor;
     }
+
+
+    // protected function cekJawaban(Soal $soal, $jawaban)
+    // {
+    //     $skor = 0;
+
+    //     // ===== MULTIPLE CHOICE (BERDASARKAN NILAI OPSI) =====
+    //     if ($soal->tipe_soal === 'multiple_choice') {
+
+    //         if (!is_string($jawaban)) {
+    //             return 0;
+    //         }
+
+    //         foreach ($soal->multiple_choice as $opsi) {
+    //             if ($opsi['opsi'] === $jawaban) {
+    //                 return (int) ($opsi['nilai'] ?? 0);
+    //             }
+    //         }
+
+    //         return 0;
+    //     }
+
+    //     // ===== MATCHING =====
+    //     if ($soal->tipe_soal === 'matching') {
+
+    //         if (!is_array($jawaban)) {
+    //             return 0;
+    //         }
+
+    //         foreach ($soal->matching as $i => $match) {
+    //             if (
+    //                 isset($jawaban[$i]) &&
+    //                 $jawaban[$i] === $match['kanan']
+    //             ) {
+    //                 $skor += $match['matching_skor'] ?? 0;
+    //             }
+    //         }
+    //     }
+
+    //     return $skor;
+    // }
 }

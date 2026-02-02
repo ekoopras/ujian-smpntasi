@@ -24,7 +24,7 @@
 
                         <div class="col-6 col-md-4 text-end ms-auto">
                             <div class="fw-semibold">{{ $peserta->nama }}</div>
-                            <small class="text-light opacity-75">{{ $peserta->kelase->kelas }}</small>
+                            <small class="text-light opacity-75">{{ $peserta->kelas }}</small>
                         </div>
 
                     </div>
@@ -32,15 +32,14 @@
             </div>
 
             {{-- BODY --}}
-            <div class="container-fluid mt-4 mb-5 pb-5">
+            <div class="container-fluid mt-4 pb-5">
                 <div class="row justify-content-center">
 
                     {{-- SOAL --}}
                     <div class="col-12 col-lg-8">
 
                         @foreach ($soals as $index => $soal)
-                            <div class="soal-item {{ $index === 0 ? '' : 'd-none' }}" data-index="{{ $index }}"
-                                data-soal-id="{{ $soal->id }}">
+                            <div class="soal-item {{ $index === 0 ? '' : 'd-none' }}" data-index="{{ $index }}">
 
                                 <div class="card shadow-sm border-0 rounded-4 mb-4">
                                     <div class="card-body p-3">
@@ -54,88 +53,28 @@
                                         </p>
 
                                         @if ($soal->gambar)
-                                            <img src="{{ asset('storage/' . $soal->gambar) }}"
-                                                class="img-fluid rounded my-2" width="260">
+                                            <img src="{{ asset('storage/' . $soal->gambar) }}" class="img-fluid rounded my-2"
+                                                width="260">
                                         @endif
 
                                     </div>
                                 </div>
 
                                 {{-- JAWABAN --}}
-
-
-                                {{-- JAWABAN --}}
                                 @if ($soal->tipe_soal === 'multiple_choice')
-                                    @foreach ($soal->multiple_choice ?? [] as $opsi)
+                                    @foreach ($soal->multiple_choice as $opsi)
                                         <div class="card shadow-sm border-0 rounded-4 mb-2">
                                             <div class="card-body">
-
                                                 <label class="form-check m-0">
                                                     <input class="form-check-input" type="radio"
-                                                        name="jawaban[{{ $soal->id }}][]" value="{{ $opsi['opsi'] }}">
-
+                                                        name="jawaban[{{ $soal->id }}]" value="{{ $opsi['opsi'] }}">
                                                     <span class="form-check-label ms-2">
                                                         {{ $opsi['opsi'] }}. {{ $opsi['jawaban'] }}
-
-                                                        @if (!empty($opsi['jawaban_img']))
-                                                            <br>
-                                                            <img src="{{ asset('storage/' . $opsi['jawaban_img']) }}"
-                                                                width="120">
-                                                        @endif
                                                     </span>
                                                 </label>
-
                                             </div>
                                         </div>
                                     @endforeach
-                                @endif
-
-                                {{-- MATCHING --}}
-                                @if ($soal->tipe_soal === 'matching')
-                                    @php
-                                        $kananList = collect($soal->matching)->pluck('kanan')->unique();
-                                    @endphp
-
-                                    <div class="card shadow-sm border-0 rounded-4">
-                                        <div class="card-body">
-
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered text-center align-middle">
-
-                                                    {{-- HEADER --}}
-                                                    <thead class="table-light">
-                                                        <tr>
-                                                            <th class="text-start">Soal</th>
-                                                            @foreach ($kananList as $kanan)
-                                                                <th>{{ $kanan }}</th>
-                                                            @endforeach
-                                                        </tr>
-                                                    </thead>
-
-                                                    {{-- BODY --}}
-                                                    <tbody>
-                                                        @foreach ($soal->matching as $i => $match)
-                                                            <tr>
-                                                                <td class="text-start fw-semibold">
-                                                                    {{ $match['kiri'] }}
-                                                                </td>
-
-                                                                @foreach ($kananList as $kanan)
-                                                                    <td>
-                                                                        <input type="radio" class="form-check-input"
-                                                                            name="jawaban[{{ $soal->id }}][{{ $i }}]"
-                                                                            value="{{ $kanan }}" required>
-                                                                    </td>
-                                                                @endforeach
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-
-                                                </table>
-                                            </div>
-
-                                        </div>
-                                    </div>
                                 @endif
 
                             </div>
@@ -152,7 +91,7 @@
                                 <div class="d-flex flex-wrap justify-content-center gap-2">
                                     @foreach ($soals as $i => $s)
                                         <button type="button" class="btn btn-outline-primary nomor-soal-btn"
-                                            onclick="goToSoal({{ $i }})" data-soal="{{ $s->id }}">
+                                            onclick="goToSoal({{ $i }})">
                                             {{ $i + 1 }}
                                         </button>
                                     @endforeach
@@ -177,7 +116,7 @@
                 <div class="d-flex flex-wrap gap-2 justify-content-center">
                     @foreach ($soals as $i => $s)
                         <button class="btn btn-outline-primary nomor-soal-btn" onclick="goToSoal({{ $i }})"
-                            data-bs-dismiss="offcanvas" data-soal="{{ $s->id }}" type="button">
+                            data-bs-dismiss="offcanvas">
                             {{ $i + 1 }}
                         </button>
                     @endforeach
@@ -197,31 +136,23 @@
                     </div>
 
                     <div class="col-3 col-lg-4">
-                        <button type="button" class="btn btn-warning w-100 fw-semibold" onclick="toggleRagu()">
+                        <button type="button" class="btn btn-warning w-100 fw-semibold">
                             Ragu
                         </button>
                     </div>
 
-
-                    <div class="col-3 col-lg-4" id="nextWrapper">
+                    <div class="col-3 col-lg-4">
                         <button type="button" class="btn btn-success w-100" onclick="nextSoal()">
                             <i class="bi bi-chevron-right"></i>
                         </button>
                     </div>
 
-                    <div class="col-3 col-lg-4 " id="submitWrapper">
-                        <button type="submit" class="btn btn-success w-100 fw-semibold">
-                            Selesai
-                        </button>
-                    </div>
-
                     <div class="col-3 d-lg-none">
                         <button class="btn btn-primary w-100" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasNomorSoal" type="button">
+                            data-bs-target="#offcanvasNomorSoal">
                             Nomor
                         </button>
                     </div>
-
 
                 </div>
             </div>
@@ -281,33 +212,16 @@
         }
     </style>
 
-    <script>
-        const DURASI_MENIT = {{ $durasiMenit }};
-    </script>
-
-
     {{-- SCRIPT --}}
     <script>
         let currentIndex = 0;
         const soalItems = document.querySelectorAll('.soal-item');
 
-        function updateButtons() {
-            const isLast = currentIndex === soalItems.length - 1;
-
-            document.getElementById('nextWrapper')
-                .classList.toggle('d-none', isLast);
-
-            document.getElementById('submitWrapper')
-                .classList.toggle('d-none', !isLast);
-        }
-
         function showSoal(index) {
             soalItems.forEach((el, i) => {
                 el.classList.toggle('d-none', i !== index);
             });
-
             currentIndex = index;
-            updateButtons(); // 🔥 panggil di sini
         }
 
         function nextSoal() {
@@ -326,106 +240,15 @@
             showSoal(index);
         }
 
-        // initial load
-        updateButtons();
-
         /* TIMER */
-        let waktu = DURASI_MENIT * 60; // menit → detik
-
-        const timerInterval = setInterval(() => {
-
-            let menit = Math.floor(waktu / 60);
-            let detik = waktu % 60;
-
+        let waktu = 90 * 60;
+        setInterval(() => {
+            let m = Math.floor(waktu / 60);
+            let d = waktu % 60;
             document.getElementById('timerText').innerText =
-                String(menit).padStart(2, '0') + ':' + String(detik).padStart(2, '0');
-
-            if (waktu <= 0) {
-                clearInterval(timerInterval);
-
-                // auto submit ketika waktu habis
-                document.getElementById('formUjian').submit();
-            }
-
-            waktu--;
+                String(m).padStart(2, '0') + ':' + String(d).padStart(2, '0');
+            if (waktu > 0) waktu--;
         }, 1000);
     </script>
-
-    <script>
-        document.addEventListener('change', function() {
-
-            document.querySelectorAll('.soal-item').forEach(soal => {
-
-                const soalId = soal.dataset.soalId;
-                const inputs = soal.querySelectorAll('input, select');
-
-                let answered = false;
-
-                inputs.forEach(el => {
-                    if ((el.type === 'radio' || el.type === 'checkbox') && el.checked) {
-                        answered = true;
-                    }
-                    if (el.tagName === 'SELECT' && el.value !== '') {
-                        answered = true;
-                    }
-                });
-
-                const nomorButtons = document.querySelectorAll(
-                    `.nomor-soal-btn[data-soal="${soalId}"]`
-                );
-
-                nomorButtons.forEach(btn => {
-                    btn.classList.toggle('btn-success', answered);
-                    btn.classList.toggle('btn-outline-primary', !answered);
-                });
-
-            });
-
-        });
-    </script>
-
-
-    <script>
-        function toggleRagu() {
-
-            const soal = document.querySelector('.soal-item:not(.d-none)');
-            if (!soal) return;
-
-            const soalId = soal.dataset.soalId;
-            const isRagu = soal.dataset.ragu === "1";
-
-            // toggle status ragu
-            soal.dataset.ragu = isRagu ? "0" : "1";
-
-            // ambil SEMUA tombol nomor (desktop + mobile)
-            const nomorButtons = document.querySelectorAll(
-                `.nomor-soal-btn[data-soal="${soalId}"]`
-            );
-
-            nomorButtons.forEach(btn => {
-
-                btn.classList.remove(
-                    'btn-success',
-                    'btn-outline-primary',
-                    'btn-warning'
-                );
-
-                if (!isRagu) {
-                    // jadi ragu
-                    btn.classList.add('btn-warning');
-                } else {
-                    // batal ragu → balik ke default / dijawab
-                    btn.classList.add('btn-outline-primary');
-                }
-            });
-        }
-    </script>
-
-
-
-
-
-
-
 
 @endsection

@@ -6,6 +6,8 @@
 
     <div class="bg-soal">
 
+
+        {{-- HEADER --}}
         <div class="ujian-header px-4 py-3 shadow-sm">
             <div class="container-fluid">
                 <div class="row align-items-center">
@@ -222,14 +224,14 @@
         }
 
         /* .bg-soal {
-                                                                                            min-height: 100vh;
-                                                                                            background-color: #0d6efd;
+                                                                                                min-height: 100vh;
+                                                                                                background-color: #0d6efd;
 
-                                                                                            background-image:
-                                                                                                radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+                                                                                                background-image:
+                                                                                                    radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
 
-                                                                                            background-size: 22px 22px;
-                                                                                        } */
+                                                                                                background-size: 22px 22px;
+                                                                                            } */
 
         .offcanvas.offcanvas-soal {
             --bs-offcanvas-width: 250px;

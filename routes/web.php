@@ -20,8 +20,13 @@ Route::get('/halaman-soal', function () {
     return view('theme.halaman-soal');
 });
 
+Route::get('/download', function () {
+    return view('pwa.download');
+});
+
+
 
 Route::get('/ujian', [UjianSiswaController::class, 'form']);
 Route::post('/ujian/cek', [UjianSiswaController::class, 'cek']);
 Route::post('/ujian/mulai', [UjianSiswaController::class, 'mulai']);
-Route::post('/ujian/submit', [UjianSiswaController::class, 'submit']);
+Route::post('/ujian/submit', [UjianSiswaController::class, 'submit'])->name('ujian.submit');
