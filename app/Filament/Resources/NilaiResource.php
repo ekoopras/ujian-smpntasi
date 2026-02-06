@@ -22,7 +22,8 @@ class NilaiResource extends Resource
 {
     protected static ?string $model = Nilai::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+
     protected static ?string $navigationGroup = 'Manajemen Ujian';
 
     public static function form(Form $form): Form

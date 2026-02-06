@@ -19,7 +19,7 @@ class KelaseResource extends Resource
 {
     protected static ?string $model = Kelase::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
     protected static ?string $navigationGroup = 'Master Data';
     protected static ?string $navigationLabel = 'Kelas';
 

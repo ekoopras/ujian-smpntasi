@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\Setting;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -31,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::hex('#6f2cf4'),
             ])
+            ->brandName('EXAM-SPENSATA')
             //->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('15rem')
             //->viteTheme('resources/css/app.css')

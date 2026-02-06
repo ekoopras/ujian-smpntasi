@@ -16,18 +16,10 @@
     }
 
     .fi-sidebar-header {
-        @apply border-r border-gray-200;
+        @apply border-r border-b border-gray-200;
     }
 
     .dark .fi-sidebar-header {
         @apply border-gray-800;
-    }
-
-    .fi-topbar {
-        @apply px-[30px] pt-[20px];
-    }
-
-    .fi-topbar nav {
-        @apply rounded-xl;
     }
 }
