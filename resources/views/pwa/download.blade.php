@@ -21,38 +21,4 @@
             </ul>
         </div>
     </div>
-
-    <script>
-        let deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-
-            document.getElementById('btnInstall').classList.remove('d-none');
-        });
-
-        document.getElementById('btnInstall')?.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-
-            deferredPrompt.prompt();
-
-            const {
-                outcome
-            } = await deferredPrompt.userChoice;
-
-            deferredPrompt = null;
-        });
-    </script>
-
-    <script>
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            document.body.innerHTML = `
-        <div class="container text-center mt-5">
-            <h3>✅ Aplikasi sudah terpasang</h3>
-            <a href="/ujian" class="btn btn-success mt-3">Buka Aplikasi</a>
-        </div>
-    `;
-        }
-    </script>
 @endsection
