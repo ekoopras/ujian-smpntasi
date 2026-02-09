@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BankSoalResource\RelationManagers;
 
+use App\Imports\MultipleChoiceImport;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
@@ -18,6 +19,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SoalsRelationManager extends RelationManager
 {
@@ -177,10 +180,15 @@ class SoalsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('soal')
             ->columns([
+                Tables\Columns\TextColumn::make('no')
+                    ->label('No')
+                    ->rowIndex(),
                 TextColumn::make('soal')
                     ->label('Soal')
                     ->limit(50)
                     ->wrap(),
+                TextColumn::make('tipe_soal')
+                    ->label('Tipe Soal'),
                 TextColumn::make('kunci_jawaban')
                     ->label('Kunci Jawaban')
                     ->badge()
@@ -199,19 +207,6 @@ class SoalsRelationManager extends RelationManager
 
                             return $jawabanBenar->isNotEmpty()
                                 ? $jawabanBenar->implode(', ')
-                                : '-';
-                        }
-
-                        /* ===============================
-         | MATCHING
-         =============================== */
-                        if ($record->tipe_soal === 'matching') {
-                            $matching = $record->matching ?? [];
-
-                            return collect($matching)->isNotEmpty()
-                                ? collect($matching)
-                                ->map(fn($item) => $item['kiri'] . ' → ' . $item['kanan'])
-                                ->implode(', ')
                                 : '-';
                         }
 
@@ -247,6 +242,30 @@ class SoalsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
+                Tables\Actions\Action::make('import')
+                    ->label('Import Soal')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->color('success')
+                    ->form([
+                        Forms\Components\FileUpload::make('file')
+                            ->label('File Excel')
+                            ->required()
+                            ->storeFiles(false)
+                            ->acceptedFileTypes([
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                            ]),
+                    ])
+                    ->action(function (array $data) {
+
+                        $bankSoalId = $this->getOwnerRecord()->id; // 🔥 parent BankSoal
+
+                        Excel::import(
+                            new MultipleChoiceImport($bankSoalId),
+                            $data['file']->getRealPath()
+                        );
+                    })
+                    ->successNotificationTitle('Soal berhasil diimport'),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

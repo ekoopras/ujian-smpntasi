@@ -6,7 +6,7 @@
     <div class="container-fluid bg-ujian">
         <div class="row justify-content-center align-items-center min-vh-100">
 
-            <div class="col-10 col-sm-8 col-md-7 col-lg-5 col-xl-4">
+            <div class="col-11 col-sm-8 col-md-7 col-lg-5 col-xl-4">
 
                 <div class="card shadow-lg border-0 rounded-4">
                     <div class="card-body p-4">

@@ -62,7 +62,6 @@
             console.error("Service workers are not supported.");
         }
     </script>
-    <script src="{{ asset('pwa-install.js') }}"></script>
 
 </body>
 

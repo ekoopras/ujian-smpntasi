@@ -29,6 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->breadcrumbs(false)
+            ->font('Poppins')
             ->colors([
                 'primary' => Color::hex('#6f2cf4'),
             ])

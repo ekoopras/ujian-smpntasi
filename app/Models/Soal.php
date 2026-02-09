@@ -20,7 +20,6 @@ class Soal extends Model
         'matching' => 'array',
     ];
 
-
     public function bankSoal()
     {
         return $this->belongsTo(BankSoal::class);

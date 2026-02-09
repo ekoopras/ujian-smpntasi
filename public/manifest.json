@@ -1,14 +1,14 @@
 {
-    "name": "Laravel Package Tutorial",
-    "short_name": "LPT",
+    "name": "AppUjian",
+    "short_name": "AppUjian",
     "start_url": "/ujian",
     "background_color": "#6777ef",
-    "description": "Tutorial of Laravel Package",
+    "description": "Selamat Mengerjakan, Semoga Sukses ya",
     "display": "fullscreen",
-    "theme_color": "#6777ef",
+    "theme_color": "#0d6efd",
     "icons": [
         {
-            "src": "logo.png",
+            "src": "ico.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
