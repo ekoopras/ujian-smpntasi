@@ -106,7 +106,7 @@
                                                     <thead class="table-light">
                                                         <tr>
                                                             <th class="text-start">Soal</th>
-                                                            @foreach ($kananList as $kanan)
+                                                            @foreach ($soal->kananList as $kanan)
                                                                 <th>{{ $kanan }}</th>
                                                             @endforeach
                                                         </tr>
@@ -120,8 +120,8 @@
                                                                     {{ $match['kiri'] }}
                                                                 </td>
 
-                                                                @foreach ($kananList as $kanan)
-                                                                    <td>
+                                                                @foreach ($soal->kananList as $kanan)
+                                                                    <td class="text-center">
                                                                         <input type="radio" class="form-check-input"
                                                                             name="jawaban[{{ $soal->id }}][{{ $i }}]"
                                                                             value="{{ $kanan }}" required>
@@ -130,6 +130,7 @@
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
+
 
                                                 </table>
                                             </div>
@@ -163,6 +164,21 @@
 
                 </div>
             </div>
+
+            <div id="lockScreen" class="lock-screen d-none">
+                <div class="lock-box">
+                    <h4>UJIAN TERKUNCI 🔒</h4>
+                    <p>Anda meninggalkan halaman ujian</p>
+
+                    <input type="text" id="unlockCode" maxlength="6" class="form-control text-center my-3"
+                        placeholder="Kode 6 Digit">
+
+                    <button class="btn btn-primary w-100" onclick="unlockUjian()">
+                        Buka Kunci
+                    </button>
+                </div>
+            </div>
+
 
         </div>
 
@@ -278,6 +294,24 @@
             justify-content: center;
             font-weight: 700;
             z-index: 1055;
+        }
+
+        .lock-screen {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .85);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lock-box {
+            background: #fff;
+            padding: 24px;
+            border-radius: 16px;
+            width: 320px;
+            text-align: center;
         }
     </style>
 
@@ -420,6 +454,75 @@
             });
         }
     </script>
+
+    <script>
+        function showLockScreen() {
+            document.getElementById('lockScreen').classList.remove('d-none');
+        }
+    </script>
+
+    <script>
+        let ujianLocked = false;
+
+        // ketika tab ditinggalkan
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                lockUjian();
+            }
+        });
+
+        // ketika window blur (alt+tab, minimize)
+        window.addEventListener("blur", function() {
+            lockUjian();
+        });
+
+        function lockUjian() {
+            if (ujianLocked) return;
+
+            ujianLocked = true;
+
+            fetch("/ujian/lock", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    peserta_id: {{ $peserta->id }}
+                })
+            });
+
+            showLockScreen();
+        }
+    </script>
+
+    <script>
+        function unlockUjian() {
+            const code = document.getElementById('unlockCode').value;
+
+            fetch("/ujian/unlock", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        peserta_id: {{ $peserta->id }},
+                        code: code
+                    })
+                })
+                .then(res => {
+                    if (res.ok) {
+                        ujianLocked = false;
+                        document.getElementById('lockScreen').classList.add('d-none');
+                    } else {
+                        alert("Kode salah!");
+                    }
+                });
+        }
+    </script>
+
+
 
 
 

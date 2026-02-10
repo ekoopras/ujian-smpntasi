@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('mapel_id')->constrained()->cascadeOnDelete();
             $table->foreignId('bank_soal_id')->constrained()->cascadeOnDelete();
             $table->string('kode_ujian')->unique();
+            $table->string('unlock_code', 6);
             $table->integer('durasi_menit')->default(60); // default 60 menit
             $table->timestamps();
         });

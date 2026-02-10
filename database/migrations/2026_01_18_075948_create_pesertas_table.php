@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('nis');
             $table->foreignId('kelase_id')->constrained()->cascadeOnDelete();
             $table->foreignId('ujian_id')->constrained()->cascadeOnDelete();
+            $table->boolean('is_locked')->default(false);
+            $table->integer('tab_violation')->default(0);
+
             $table->timestamps();
         });
     }

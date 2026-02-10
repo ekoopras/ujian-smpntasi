@@ -72,6 +72,17 @@ class UjianResource extends Resource
                             })
                     ),
 
+                Forms\Components\TextInput::make('unlock_code')
+                    ->label('Kode Buka Ujian (6 Digit)')
+                    ->helperText('Digunakan jika siswa keluar dari tab ujian')
+                    ->numeric()
+                    ->length(6)
+                    ->required()
+                    ->rule('digits:6')
+                    ->password() // biar tidak kelihatan sembarang orang
+                    ->revealable() // bisa dilihat kalau diklik
+                    ->autocomplete(false),
+
                 Forms\Components\TextInput::make('durasi_menit')
                     ->label('Durasi Ujian (menit)')
                     ->numeric()

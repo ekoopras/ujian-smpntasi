@@ -17,6 +17,7 @@ class Ujian extends Model
         'bank_soal_id',
         'kode_ujian',
         'durasi_menit',
+        'unlock_code',
     ];
 
     public function kelase()

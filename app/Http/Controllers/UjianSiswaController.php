@@ -33,6 +33,23 @@ class UjianSiswaController extends Controller
         ]);
     }
 
+    // public function mulai(Request $request)
+    // {
+    //     $peserta = Peserta::create([
+    //         'nama' => $request->nama,
+    //         'nis' => $request->nis,
+    //         'kelase_id' => $request->kelase_id,
+    //         'ujian_id' => $request->ujian_id,
+    //     ]);
+
+    //     $soals = Soal::where('bank_soal_id', $peserta->ujian->bank_soal_id)->get();
+
+    //     // ambil durasi ujian (menit)
+    //     $durasiMenit = $peserta->ujian->durasi_menit;
+
+    //     return view('ujian.soal', compact('peserta', 'soals', 'durasiMenit'));
+    // }
+
     public function mulai(Request $request)
     {
         $peserta = Peserta::create([
@@ -40,15 +57,34 @@ class UjianSiswaController extends Controller
             'nis' => $request->nis,
             'kelase_id' => $request->kelase_id,
             'ujian_id' => $request->ujian_id,
+            'started_at' => now(),
+            'is_locked' => false,
         ]);
 
-        $soals = Soal::where('bank_soal_id', $peserta->ujian->bank_soal_id)->get();
 
-        // ambil durasi ujian (menit)
+        // 🔥 ACak urutan SOAL SAJA
+        $soals = Soal::where('bank_soal_id', $peserta->ujian->bank_soal_id)
+            ->get()
+            ->shuffle($peserta->id); // konsisten per peserta
+
+        // 🎯 khusus MATCHING (kolom kanan diacak)
+        $soals->each(function ($soal) use ($peserta) {
+            if ($soal->tipe_soal === 'matching') {
+                $soal->kananList = collect($soal->matching)
+                    ->pluck('kanan')
+                    ->unique()
+                    ->shuffle($peserta->id)
+                    ->values()
+                    ->toArray();
+            }
+        });
+
         $durasiMenit = $peserta->ujian->durasi_menit;
 
         return view('ujian.soal', compact('peserta', 'soals', 'durasiMenit'));
     }
+
+
 
     public function submit(Request $request)
     {
@@ -114,6 +150,33 @@ class UjianSiswaController extends Controller
 
         return $skor;
     }
+
+    public function lock(Request $request)
+    {
+        Peserta::where('id', $request->peserta_id)->update([
+            'is_locked' => true,
+            'tab_violation' => DB::raw('tab_violation + 1'),
+        ]);
+
+        return response()->json(['locked' => true]);
+    }
+
+    public function unlock(Request $request)
+    {
+        $peserta = Peserta::findOrFail($request->peserta_id);
+
+        if ($request->code === $peserta->ujian->unlock_code) {
+            $peserta->update(['is_locked' => false]);
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Kode salah'
+        ], 403);
+    }
+
 
 
     // protected function cekJawaban(Soal $soal, $jawaban)

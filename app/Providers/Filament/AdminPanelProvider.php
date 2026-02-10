@@ -25,17 +25,21 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->brandLogo(asset('logo-light.png'))
+            ->brandLogoHeight('auto')
+            ->darkModeBrandLogo(asset('logo-dark.png')) // Opsional: logo untuk dark mode
+            //->brandNamePosition('right') // atau 'bottom', 'hidden'
             ->id('admin')
             ->path('admin')
             ->login()
             ->breadcrumbs(false)
             ->font('Poppins')
             ->colors([
-                'primary' => Color::hex('#6f2cf4'),
+                'primary' => Color::hex('#3742f5'),
             ])
             ->brandName('EXAM-SPENSATA')
             //->sidebarCollapsibleOnDesktop()
-            ->sidebarWidth('15rem')
+            ->sidebarWidth('18rem')
             //->viteTheme('resources/css/app.css')
             ->theme(asset('css/filament/admin/theme.css'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
