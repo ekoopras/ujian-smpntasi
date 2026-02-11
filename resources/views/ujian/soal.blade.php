@@ -17,9 +17,9 @@
 
                         <div class="col-6 col-md-4 d-flex align-items-center gap-2">
                             <div class="logo-circle d-flex align-items-center justify-content-center">
-                                <i class="bi bi-mortarboard-fill fs-4"></i>
+                                {{-- <i class="bi bi-mortarboard-fill fs-4"></i> --}}
+                                <img src="{{ asset('ico.png') }}" alt="UjianApp" style="width: 4rem">
                             </div>
-                            <span class="fw-semibold d-none d-md-inline">UJIAN ONLINE</span>
                         </div>
 
                         <div class="col-6 col-md-4 text-end ms-auto">
@@ -170,10 +170,10 @@
                     <h4>UJIAN TERKUNCI 🔒</h4>
                     <p>Anda meninggalkan halaman ujian</p>
 
-                    <input type="text" id="unlockCode" maxlength="6" class="form-control text-center my-3"
-                        placeholder="Kode 6 Digit">
+                    <input type="password" id="unlockCode" maxlength="6" class="form-control text-center my-3"
+                        placeholder="Kode 6 Digit" autocomplete="off" autocorrect="off" spellcheck="false">
 
-                    <button class="btn btn-primary w-100" onclick="unlockUjian()">
+                    <button type="button" class="btn btn-primary w-100" onclick="unlockUjian()">
                         Buka Kunci
                     </button>
                 </div>
@@ -496,7 +496,7 @@
         }
     </script>
 
-    <script>
+    {{-- <script>
         function unlockUjian() {
             const code = document.getElementById('unlockCode').value;
 
@@ -520,7 +520,40 @@
                     }
                 });
         }
+    </script> --}}
+    <script>
+        function unlockUjian() {
+            const input = document.getElementById('unlockCode');
+            const code = input.value;
+
+            fetch("/ujian/unlock", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        peserta_id: {{ $peserta->id }},
+                        code: code
+                    })
+                })
+                .then(res => {
+                    if (res.ok) {
+                        ujianLocked = false;
+
+                        // 🔥 KOSONGKAN INPUT
+                        input.value = "";
+
+                        document.getElementById('lockScreen').classList.add('d-none');
+                    } else {
+                        // 🔥 JUGA KOSONGKAN JIKA SALAH
+                        input.value = "";
+                        alert("Kode salah!");
+                    }
+                });
+        }
     </script>
+
 
 
 

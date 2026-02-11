@@ -9,11 +9,12 @@ use App\Models\Peserta;
 use App\Models\Soal;
 use App\Models\Ujian;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class UjianSiswaController extends Controller
 {
 
+    //view
     public function form()
     {
         return view('ujian.index', [
@@ -21,11 +22,22 @@ class UjianSiswaController extends Controller
         ]);
     }
 
+    //cek-peserta-ujian
     public function cek(Request $request)
     {
         $ujian = Ujian::where('kode_ujian', $request->kode_ujian)
             ->where('kelase_id', $request->kelase_id)
             ->firstOrFail();
+
+        // 🔎 Cek apakah siswa sudah pernah ikut ujian ini
+        $sudahIkut = Peserta::where('nis', $request->nis)
+            ->where('ujian_id', $ujian->id)
+            ->exists();
+
+        if ($sudahIkut) {
+            return redirect()->route('ujian.sudah')
+                ->with('error', 'Anda sudah mengikuti ujian mapel ini.');
+        }
 
         return view('ujian.review', [
             'data' => $request->all(),
@@ -33,23 +45,8 @@ class UjianSiswaController extends Controller
         ]);
     }
 
-    // public function mulai(Request $request)
-    // {
-    //     $peserta = Peserta::create([
-    //         'nama' => $request->nama,
-    //         'nis' => $request->nis,
-    //         'kelase_id' => $request->kelase_id,
-    //         'ujian_id' => $request->ujian_id,
-    //     ]);
 
-    //     $soals = Soal::where('bank_soal_id', $peserta->ujian->bank_soal_id)->get();
-
-    //     // ambil durasi ujian (menit)
-    //     $durasiMenit = $peserta->ujian->durasi_menit;
-
-    //     return view('ujian.soal', compact('peserta', 'soals', 'durasiMenit'));
-    // }
-
+    //mulai ujian
     public function mulai(Request $request)
     {
         $peserta = Peserta::create([
@@ -65,7 +62,7 @@ class UjianSiswaController extends Controller
         // 🔥 ACak urutan SOAL SAJA
         $soals = Soal::where('bank_soal_id', $peserta->ujian->bank_soal_id)
             ->get()
-            ->shuffle($peserta->id); // konsisten per peserta
+            ->shuffle($peserta->id);
 
         // 🎯 khusus MATCHING (kolom kanan diacak)
         $soals->each(function ($soal) use ($peserta) {
@@ -85,7 +82,7 @@ class UjianSiswaController extends Controller
     }
 
 
-
+    //submit jawaban
     public function submit(Request $request)
     {
         if (Nilai::where('peserta_id', $request->peserta_id)->exists()) {
@@ -118,10 +115,10 @@ class UjianSiswaController extends Controller
             'total_skor' => $total,
         ]);
 
-        return redirect('/ujian/selesai');
+        return redirect('/ujian-selesai');
     }
 
-
+    //cek jawaban
     protected function cekJawaban(Soal $soal, $jawaban)
     {
         $skor = 0;
@@ -151,6 +148,7 @@ class UjianSiswaController extends Controller
         return $skor;
     }
 
+    //lock keamanan
     public function lock(Request $request)
     {
         Peserta::where('id', $request->peserta_id)->update([
@@ -161,6 +159,7 @@ class UjianSiswaController extends Controller
         return response()->json(['locked' => true]);
     }
 
+    //unlock keamanan
     public function unlock(Request $request)
     {
         $peserta = Peserta::findOrFail($request->peserta_id);
@@ -176,46 +175,4 @@ class UjianSiswaController extends Controller
             'message' => 'Kode salah'
         ], 403);
     }
-
-
-
-    // protected function cekJawaban(Soal $soal, $jawaban)
-    // {
-    //     $skor = 0;
-
-    //     // ===== MULTIPLE CHOICE (BERDASARKAN NILAI OPSI) =====
-    //     if ($soal->tipe_soal === 'multiple_choice') {
-
-    //         if (!is_string($jawaban)) {
-    //             return 0;
-    //         }
-
-    //         foreach ($soal->multiple_choice as $opsi) {
-    //             if ($opsi['opsi'] === $jawaban) {
-    //                 return (int) ($opsi['nilai'] ?? 0);
-    //             }
-    //         }
-
-    //         return 0;
-    //     }
-
-    //     // ===== MATCHING =====
-    //     if ($soal->tipe_soal === 'matching') {
-
-    //         if (!is_array($jawaban)) {
-    //             return 0;
-    //         }
-
-    //         foreach ($soal->matching as $i => $match) {
-    //             if (
-    //                 isset($jawaban[$i]) &&
-    //                 $jawaban[$i] === $match['kanan']
-    //             ) {
-    //                 $skor += $match['matching_skor'] ?? 0;
-    //             }
-    //         }
-    //     }
-
-    //     return $skor;
-    // }
 }

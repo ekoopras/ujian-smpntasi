@@ -5,25 +5,16 @@ use App\Http\Controllers\UjianSiswaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/halaman1', function () {
-    return view('theme.halaman1');
-});
-
-Route::get('/halaman2', function () {
-    return view('theme.halaman2');
-});
-
-Route::get('/halaman-soal', function () {
-    return view('theme.halaman-soal');
-});
-
-Route::get('/download', function () {
     return view('pwa.download');
 });
 
+Route::get('/ujian-selesai', function () {
+    return view('ujian.selesai');
+});
+
+Route::get('/ujian/sudah', function () {
+    return view('ujian.sudah');
+})->name('ujian.sudah');
 
 
 Route::get('/ujian', [UjianSiswaController::class, 'form']);

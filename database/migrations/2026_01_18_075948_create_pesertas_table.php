@@ -14,12 +14,11 @@ return new class extends Migration
         Schema::create('pesertas', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->string('nis');
+            $table->string('nis')->unique();
             $table->foreignId('kelase_id')->constrained()->cascadeOnDelete();
             $table->foreignId('ujian_id')->constrained()->cascadeOnDelete();
             $table->boolean('is_locked')->default(false);
             $table->integer('tab_violation')->default(0);
-
             $table->timestamps();
         });
     }

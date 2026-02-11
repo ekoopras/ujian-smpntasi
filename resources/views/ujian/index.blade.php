@@ -13,9 +13,10 @@
 
                         {{-- Icon --}}
                         <div class="text-center mb-2">
-                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
-                                style="width:64px;height:64px;">
-                                <i class="bi bi-mortarboard-fill fs-3"></i>
+                            <div class="d-inline-flex align-items-center justify-content-center">
+                                <img src="{{ asset('ico.png') }}" alt="UjianApp"
+                                    style="width:100px;box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);border-radius: 20px;">
+                                {{-- <i class="bi bi-mortarboard-fill fs-3"></i> --}}
                             </div>
                         </div>
 
@@ -99,8 +100,3 @@
     </script>
 
 @endsection
-
-{{-- /* .bg-ujian {
-min-height: 100vh;
-background: linear-gradient(180deg, #f8fbff 0%, #e6efff 100%);
-} */ --}}
