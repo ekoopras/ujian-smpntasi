@@ -34,10 +34,19 @@ class UserResource extends Resource
                     ->dehydrated(fn($state) => filled($state))
                     ->required(fn(string $context) => $context === 'create'),
 
-                Forms\Components\Select::make('mapel_id')
+                // Forms\Components\Select::make('mapel_id')
+                //     ->label('Mapel')
+                //     ->options(Mapel::all()->pluck('mapel', 'id'))
+                //     ->required(),
+
+                Forms\Components\Select::make('mapel')
                     ->label('Mapel')
-                    ->options(Mapel::all()->pluck('mapel', 'id'))
+                    ->relationship('mapel', 'mapel') // lebih bagus pakai relationship
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
                     ->required(),
+
                 Forms\Components\Select::make('role')
                     ->options([
                         'super_admin' => 'Super Admin',

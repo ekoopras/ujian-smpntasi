@@ -129,13 +129,29 @@ class NilaiResource extends Resource
     }
 
 
+    // public static function getEloquentQuery(): Builder
+    // {
+    //     $query = parent::getEloquentQuery();
+
+    //     if (!auth()->user()->isSuperAdmin()) {
+    //         $query->whereHas('peserta.ujian', function ($q) {
+    //             $q->where('mapel_id', auth()->user()->mapel_id);
+    //         });
+    //     }
+
+    //     return $query;
+    // }
+
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
         if (!auth()->user()->isSuperAdmin()) {
             $query->whereHas('peserta.ujian', function ($q) {
-                $q->where('mapel_id', auth()->user()->mapel_id);
+                $q->whereIn(
+                    'mapel_id',
+                    auth()->user()->mapel()->pluck('mapels.id')
+                );
             });
         }
 

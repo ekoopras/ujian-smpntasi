@@ -47,9 +47,14 @@ class User extends Authenticatable
         ];
     }
 
+    // public function mapel()
+    // {
+    //     return $this->belongsTo(Mapel::class);
+    // }
+
     public function mapel()
     {
-        return $this->belongsTo(Mapel::class);
+        return $this->belongsToMany(Mapel::class);
     }
 
     public function isSuperAdmin()

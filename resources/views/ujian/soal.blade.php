@@ -554,14 +554,4 @@
         }
     </script>
 
-
-
-
-
-
-
-
-
-
-
 @endsection

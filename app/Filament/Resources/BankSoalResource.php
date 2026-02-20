@@ -135,6 +135,11 @@ class BankSoalResource extends Resource
             return $query; // super admin lihat semua
         }
 
-        return $query->where('mapel_id', auth()->user()->mapel_id); // guru hanya mapel sendiri
+        //return $query->where('mapel_id', auth()->user()->mapel_id); // guru hanya mapel sendiri
+
+        return $query->whereIn(
+            'mapel_id',
+            auth()->user()->mapel()->pluck('mapels.id')
+        );
     }
 }
