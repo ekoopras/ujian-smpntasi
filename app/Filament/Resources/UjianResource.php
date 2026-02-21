@@ -10,6 +10,7 @@ use App\Models\Mapel;
 use App\Models\Ujian;
 use Filament\Forms;
 use Filament\Forms\Components\MultiSelect;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
@@ -36,93 +37,98 @@ class UjianResource extends Resource
                 //     ->relationship('kelase', 'kelas') // pastikan field 'nama' ada di tabel kelas
                 //     ->required(),
 
-                Forms\Components\Select::make('kelase')
-                    ->label('Kelas')
-                    ->relationship('kelase', 'kelas')
-                    ->multiple()
-                    ->preload()
-                    ->searchable()
-                    ->required(),
+                Section::make()
+                    ->schema([
+                        Forms\Components\Select::make('kelase')
+                            ->label('Kelas')
+                            ->relationship('kelase', 'kelas')
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->required(),
 
-                Forms\Components\Select::make('mapel_id')
-                    ->label('Mapel')
-                    ->options(function () {
-                        // Super admin bisa pilih semua mapel
-                        if (auth()->user()->isSuperAdmin()) {
-                            return \App\Models\Mapel::all()->pluck('mapel', 'id');
-                        }
-                        // Guru otomatis hanya mapel mereka sendiri
-                        return \App\Models\Mapel::where('id', auth()->user()->mapel_id)
-                            ->pluck('mapel', 'id');
-                    })
-                    ->default(function () {
-                        // Set default mapel guru
-                        if (!auth()->user()->isSuperAdmin()) {
-                            return auth()->user()->mapel_id;
-                        }
-                        return null; // super admin default kosong
-                    })
-                    ->required(),
-
-                Forms\Components\TextInput::make('kode_ujian')
-                    ->label('Kode Ujian')
-                    ->disabled() // tidak bisa diubah user
-                    ->dehydrated(false) // jangan kirim ke backend (biar auto generate)
-                    ->default(function () {
-                        return strtoupper(Str::random(6));
-                    })
-                    ->suffixAction(
-                        Forms\Components\Actions\Action::make('generate')
-                            ->icon('heroicon-o-arrow-path')
-                            ->label('Generate')
-                            ->action(function (Forms\Set $set) {
-                                $set('kode_ujian', strtoupper(Str::random(6)));
+                        Forms\Components\Select::make('mapel_id')
+                            ->label('Mapel')
+                            ->options(function () {
+                                // Super admin bisa pilih semua mapel
+                                if (auth()->user()->isSuperAdmin()) {
+                                    return \App\Models\Mapel::all()->pluck('mapel', 'id');
+                                }
+                                // Guru otomatis hanya mapel mereka sendiri
+                                return \App\Models\Mapel::where('id', auth()->user()->mapel_id)
+                                    ->pluck('mapel', 'id');
                             })
-                    ),
+                            ->default(function () {
+                                // Set default mapel guru
+                                if (!auth()->user()->isSuperAdmin()) {
+                                    return auth()->user()->mapel_id;
+                                }
+                                return null; // super admin default kosong
+                            })
+                            ->required(),
 
-                Forms\Components\TextInput::make('unlock_code')
-                    ->label('Kode Buka Ujian (6 Digit)')
-                    ->helperText('Digunakan jika siswa keluar dari tab ujian')
-                    ->numeric()
-                    ->length(6)
-                    ->required()
-                    ->rule('digits:6')
-                    ->password() // biar tidak kelihatan sembarang orang
-                    ->revealable() // bisa dilihat kalau diklik
-                    ->autocomplete(false),
+                        Forms\Components\Select::make('bank_soal_id')
+                            ->label('Bank Soal')
+                            ->searchable()
+                            ->options(function (Get $get) {
 
-                Forms\Components\TextInput::make('durasi_menit')
-                    ->label('Durasi Ujian (menit)')
-                    ->numeric()
-                    ->default(60)
-                    ->suffix('menit')
-                    ->required(),
+                                $query = \App\Models\BankSoal::query();
 
-                Forms\Components\Select::make('bank_soal_id')
-                    ->label('Bank Soal')
-                    ->searchable()
-                    ->options(function (Get $get) {
+                                // 🔐 filter berdasarkan role guru
+                                if (!auth()->user()->isSuperAdmin()) {
+                                    $query->where('mapel_id', auth()->user()->mapel_id);
+                                }
 
-                        $query = \App\Models\BankSoal::query();
+                                // 🔗 filter berdasarkan mapel yang dipilih di form
+                                if ($get('mapel_id')) {
+                                    $query->where('mapel_id', $get('mapel_id'));
+                                }
 
-                        // 🔐 filter berdasarkan role guru
-                        if (!auth()->user()->isSuperAdmin()) {
-                            $query->where('mapel_id', auth()->user()->mapel_id);
-                        }
+                                return $query->get()->mapWithKeys(fn($record) => [
+                                    $record->id =>
+                                    $record->mapel->mapel
+                                        . ' | ' . $record->kelas
+                                        . ' | Semester ' . $record->semester,
+                                ]);
+                            })
+                            ->required(),
 
-                        // 🔗 filter berdasarkan mapel yang dipilih di form
-                        if ($get('mapel_id')) {
-                            $query->where('mapel_id', $get('mapel_id'));
-                        }
+                        Forms\Components\TextInput::make('kode_ujian')
+                            ->label('Kode Ujian')
+                            ->disabled() // tidak bisa diubah user
+                            ->dehydrated(false) // jangan kirim ke backend (biar auto generate)
+                            ->default(function () {
+                                return strtoupper(Str::random(6));
+                            })
+                            ->suffixAction(
+                                Forms\Components\Actions\Action::make('generate')
+                                    ->icon('heroicon-o-arrow-path')
+                                    ->label('Generate')
+                                    ->action(function (Forms\Set $set) {
+                                        $set('kode_ujian', strtoupper(Str::random(6)));
+                                    })
+                            ),
 
-                        return $query->get()->mapWithKeys(fn($record) => [
-                            $record->id =>
-                            $record->mapel->mapel
-                                . ' | ' . $record->kelas
-                                . ' | Semester ' . $record->semester,
-                        ]);
-                    })
-                    ->required(),
+                        Forms\Components\TextInput::make('unlock_code')
+                            ->label('Kode Buka Ujian (6 Digit)')
+                            ->helperText('Digunakan jika siswa keluar dari tab ujian')
+                            ->numeric()
+                            ->length(6)
+                            ->required()
+                            ->rule('digits:6')
+                            ->password() // biar tidak kelihatan sembarang orang
+                            ->revealable() // bisa dilihat kalau diklik
+                            ->autocomplete(false),
+
+                        Forms\Components\TextInput::make('durasi_menit')
+                            ->label('Durasi Ujian (menit)')
+                            ->numeric()
+                            ->default(60)
+                            ->suffix('menit')
+                            ->required(),
+
+
+                    ])->columns(3),
 
             ]);
     }

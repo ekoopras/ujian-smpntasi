@@ -68,6 +68,8 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('mapel.mapel')
                     ->label('Mapel')
+                    ->badge()
+                    ->color('success')
                     ->formatStateUsing(fn($state) => Str::title($state)),
                 Tables\Columns\TextColumn::make('role'),
             ])

@@ -51,9 +51,9 @@ class BankSoalResource extends Resource
                             ->required(),
                         Forms\Components\Select::make('kelas')
                             ->options([
-                                'Kelas-1' => 'Kelas 1',
-                                'Kelas-2' => 'Kelas 2',
-                                'Kelas-3' => 'Kelas 3',
+                                'Kelas-7' => 'Kelas 7',
+                                'Kelas-8' => 'Kelas 8',
+                                'Kelas-9' => 'Kelas 9',
                             ])
                             ->required(),
 
@@ -64,7 +64,6 @@ class BankSoalResource extends Resource
                             ])
                             ->required(),
                     ])->columns(3),
-
 
             ]);
     }
