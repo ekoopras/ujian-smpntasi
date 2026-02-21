@@ -26,6 +26,14 @@
                             Silakan lengkapi data sebelum memulai ujian
                         </p>
 
+                        {{-- ALERT --}}
+                        @if (session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        @endif
+
                         {{-- FORM (punya kamu) --}}
                         <form method="POST" action="/ujian/cek">
                             @csrf
@@ -33,7 +41,7 @@
                             {{-- Nama --}}
                             <div class="mb-2">
                                 <label class="form-label fw-semibold" style="font-size: 15px">Nama</label>
-                                <input type="text" name="nama" class="form-control"
+                                <input type="text" name="nama" class="form-control" value="{{ old('nama') }}"
                                     placeholder="Masukkan nama lengkap" id="nama" required>
                             </div>
 
@@ -41,7 +49,7 @@
                             <div class="mb-2">
                                 <label class="form-label fw-semibold" style="font-size: 15px">NIS</label>
                                 <input type="text" name="nis" class="form-control" placeholder="Nomor Induk Siswa"
-                                    required>
+                                    value="{{ old('nis') }}" required>
                             </div>
 
                             {{-- Kelas --}}
@@ -50,7 +58,10 @@
                                 <select name="kelase_id" class="form-select" required>
                                     <option value="">-- Pilih Kelas --</option>
                                     @foreach ($kelas as $k)
-                                        <option value="{{ $k->id }}">{{ $k->kelas }}</option>
+                                        <option value="{{ $k->id }}"
+                                            {{ old('kelase_id') == $k->id ? 'selected' : '' }}>
+                                            {{ $k->kelas }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -59,7 +70,7 @@
                             <div class="mb-3">
                                 <label class="form-label fw-semibold" style="font-size: 15px">Kode Ujian</label>
                                 <input type="text" name="kode_ujian" class="form-control" placeholder="Contoh: UJIAN-123"
-                                    required>
+                                    value="{{ old('kode_ujian') }}" required>
                             </div>
 
                             {{-- Button --}}

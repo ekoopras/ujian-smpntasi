@@ -47,21 +47,32 @@ class UjianSiswaController extends Controller
 
     public function cek(Request $request)
     {
+        // ambil ujian berdasarkan kode dan kelas
         $ujian = Ujian::where('kode_ujian', $request->kode_ujian)
             ->whereHas('kelase', function ($q) use ($request) {
                 $q->where('kelases.id', $request->kelase_id);
             })
-            ->firstOrFail();
+            ->first();
 
+        // jika tidak ditemukan
+        if (!$ujian) {
+            return back()
+                ->withInput()
+                ->with('error', 'Kode ujian tidak ditemukan atau tidak sesuai dengan kelas.');
+        }
+
+        // cek apakah sudah ikut
         $sudahIkut = Peserta::where('nis', $request->nis)
             ->where('ujian_id', $ujian->id)
             ->exists();
 
         if ($sudahIkut) {
-            return redirect()->route('ujian.sudah')
+            return back()
+                ->withInput()
                 ->with('error', 'Anda sudah mengikuti ujian mapel ini.');
         }
 
+        // ambil kelas yang dipilih
         $kelasDipilih = $ujian->kelase()
             ->where('kelases.id', $request->kelase_id)
             ->first();

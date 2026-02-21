@@ -202,7 +202,7 @@
         </div>
 
         {{-- FOOTER --}}
-        <div class="ujian-footer fixed-bottom bg-white border-top shadow-sm">
+        <div class="ujian-footer fixed-bottom bg-white border-top shadow-sm" style="padding:10px 0 15px 0">
             <div class="container-fluid">
                 <div class="row align-items-center py-2">
 
@@ -281,8 +281,8 @@
 
         .timer-floating {
             position: fixed;
-            bottom: 80px;
-            left: 92%;
+            bottom: 100px;
+            left: 88%;
             transform: translateX(-50%);
             width: 72px;
             height: 72px;

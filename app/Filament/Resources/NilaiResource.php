@@ -73,6 +73,7 @@ class NilaiResource extends Resource
                 Tables\Actions\Action::make('export_excel')
                     ->label('Export Excel')
                     ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
                     ->action(function ($livewire) {
                         $query = $livewire->getFilteredTableQuery();
 
