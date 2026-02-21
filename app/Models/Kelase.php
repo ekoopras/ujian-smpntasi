@@ -13,4 +13,9 @@ class Kelase extends Model
         'kelas',
         'slug',
     ];
+
+    public function ujians()
+    {
+        return $this->belongsToMany(Ujian::class, 'kelas_ujian', 'kelase_id', 'ujian_id');
+    }
 }

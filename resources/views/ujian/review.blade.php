@@ -50,7 +50,10 @@
 
                                 <li class="list-group-item px-0">
                                     <small class="text-muted">Kelas</small><br>
-                                    <span class="fw-semibold">{{ $ujian->kelase->kelas }}</span>
+                                    {{-- <span class="fw-semibold">{{ $ujian->kelase->kelas }}</span> --}}
+                                    <span class="fw-semibold">
+                                        {{ $kelasDipilih->kelas }}
+                                    </span>
                                 </li>
 
                                 <li class="list-group-item px-0">

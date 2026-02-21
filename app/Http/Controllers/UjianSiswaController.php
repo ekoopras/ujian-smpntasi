@@ -23,13 +23,36 @@ class UjianSiswaController extends Controller
     }
 
     //cek-peserta-ujian
+    // public function cek(Request $request)
+    // {
+    //     $ujian = Ujian::where('kode_ujian', $request->kode_ujian)
+    //         ->where('kelase_id', $request->kelase_id)
+    //         ->firstOrFail();
+
+    //     // 🔎 Cek apakah siswa sudah pernah ikut ujian ini
+    //     $sudahIkut = Peserta::where('nis', $request->nis)
+    //         ->where('ujian_id', $ujian->id)
+    //         ->exists();
+
+    //     if ($sudahIkut) {
+    //         return redirect()->route('ujian.sudah')
+    //             ->with('error', 'Anda sudah mengikuti ujian mapel ini.');
+    //     }
+
+    //     return view('ujian.review', [
+    //         'data' => $request->all(),
+    //         'ujian' => $ujian,
+    //     ]);
+    // }
+
     public function cek(Request $request)
     {
         $ujian = Ujian::where('kode_ujian', $request->kode_ujian)
-            ->where('kelase_id', $request->kelase_id)
+            ->whereHas('kelase', function ($q) use ($request) {
+                $q->where('kelases.id', $request->kelase_id);
+            })
             ->firstOrFail();
 
-        // 🔎 Cek apakah siswa sudah pernah ikut ujian ini
         $sudahIkut = Peserta::where('nis', $request->nis)
             ->where('ujian_id', $ujian->id)
             ->exists();
@@ -39,9 +62,14 @@ class UjianSiswaController extends Controller
                 ->with('error', 'Anda sudah mengikuti ujian mapel ini.');
         }
 
+        $kelasDipilih = $ujian->kelase()
+            ->where('kelases.id', $request->kelase_id)
+            ->first();
+
         return view('ujian.review', [
             'data' => $request->all(),
             'ujian' => $ujian,
+            'kelasDipilih' => $kelasDipilih,
         ]);
     }
 

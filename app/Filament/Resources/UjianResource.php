@@ -31,9 +31,17 @@ class UjianResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('kelase_id')
+                // Forms\Components\Select::make('kelase_id')
+                //     ->label('Kelas')
+                //     ->relationship('kelase', 'kelas') // pastikan field 'nama' ada di tabel kelas
+                //     ->required(),
+
+                Forms\Components\Select::make('kelase')
                     ->label('Kelas')
-                    ->relationship('kelase', 'kelas') // pastikan field 'nama' ada di tabel kelas
+                    ->relationship('kelase', 'kelas')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
                     ->required(),
 
                 Forms\Components\Select::make('mapel_id')
@@ -123,7 +131,7 @@ class UjianResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('kelase.kelas')->label('Kelas')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('kelase.kelas')->label('Kelas')->sortable()->searchable()->badge(),
                 Tables\Columns\TextColumn::make('mapel.mapel')->label('Mapel')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('kode_ujian')->label('Kode Ujian')->copyable(),
                 Tables\Columns\TextColumn::make('durasi_menit')->label('Durasi')->suffix(' menit'),

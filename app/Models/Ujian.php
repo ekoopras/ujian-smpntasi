@@ -12,7 +12,6 @@ class Ujian extends Model
     protected $table = 'ujians';
 
     protected $fillable = [
-        'kelase_id',
         'mapel_id',
         'bank_soal_id',
         'kode_ujian',
@@ -20,10 +19,10 @@ class Ujian extends Model
         'unlock_code',
     ];
 
-    public function kelase()
-    {
-        return $this->belongsTo(Kelase::class);
-    }
+    // public function kelase()
+    // {
+    //     return $this->belongsTo(Kelase::class);
+    // }
 
     public function mapel()
     {
@@ -38,6 +37,11 @@ class Ujian extends Model
     public function pesertas()
     {
         return $this->hasMany(Peserta::class);
+    }
+
+    public function kelase()
+    {
+        return $this->belongsToMany(Kelase::class, 'kelas_ujian', 'ujian_id', 'kelase_id');
     }
 
 
