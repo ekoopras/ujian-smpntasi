@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->brandName('EXAM-SPENSATA')
             //->sidebarCollapsibleOnDesktop()
-            ->sidebarWidth('18rem')
+            ->sidebarWidth('14rem')
             //->viteTheme('resources/css/app.css')
             ->theme(asset('css/filament/admin/theme.css'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

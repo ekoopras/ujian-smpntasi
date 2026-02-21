@@ -137,11 +137,37 @@ class UjianResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('kelase.kelas')->label('Kelas')->sortable()->searchable()->badge(),
-                Tables\Columns\TextColumn::make('mapel.mapel')->label('Mapel')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('kode_ujian')->label('Kode Ujian')->copyable(),
-                Tables\Columns\TextColumn::make('durasi_menit')->label('Durasi')->suffix(' menit'),
-                Tables\Columns\TextColumn::make('created_at')->dateTime('d M Y H:i'),
+
+                Tables\Columns\TextColumn::make('mapel.mapel')
+                    ->label('Mapel')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(function ($state) {
+                        $words = explode(' ', $state);
+                        // ambil 4 kata pertama untuk baris pertama
+                        $firstLine = implode(' ', array_slice($words, 0, 3));
+                        // sisanya untuk baris kedua
+                        $secondLine = implode(' ', array_slice($words, 3));
+                        // gabungkan dengan <br>
+                        return $firstLine . '<br>' . $secondLine;
+                    })
+                    ->html(),
+                Tables\Columns\TextColumn::make('kelase.kelas')
+                    ->label('Kelas')
+                    ->sortable()
+                    ->searchable()
+                    ->badge()
+                    ->color('success'),
+                Tables\Columns\TextColumn::make('kode_ujian')
+                    ->label('Kode Ujian')
+                    ->badge()
+                    ->color('success')
+                    ->copyable(),
+                Tables\Columns\TextColumn::make('durasi_menit')
+                    ->label('Durasi')
+                    ->suffix(' menit'),
+                // Tables\Columns\TextColumn::make('created_at')
+                //     ->dateTime('d M Y'),
             ])
             ->filters([
                 //
