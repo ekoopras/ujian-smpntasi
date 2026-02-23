@@ -80,24 +80,19 @@ class UjianResource extends Resource
                             ->searchable()
                             ->options(function (Get $get) {
 
-                                $query = \App\Models\BankSoal::query();
-
-                                // 🔐 filter berdasarkan role guru
-                                if (!auth()->user()->isSuperAdmin()) {
-                                    $query->where('mapel_id', auth()->user()->mapel_id);
+                                if (!$get('mapel_id')) {
+                                    return [];
                                 }
 
-                                // 🔗 filter berdasarkan mapel yang dipilih di form
-                                if ($get('mapel_id')) {
-                                    $query->where('mapel_id', $get('mapel_id'));
-                                }
-
-                                return $query->get()->mapWithKeys(fn($record) => [
-                                    $record->id =>
-                                    $record->mapel->mapel
-                                        . ' | ' . $record->kelas
-                                        . ' | Semester ' . $record->semester,
-                                ]);
+                                return BankSoal::where('mapel_id', $get('mapel_id'))
+                                    ->with('mapel')
+                                    ->get()
+                                    ->mapWithKeys(fn($record) => [
+                                        $record->id =>
+                                        $record->mapel->mapel
+                                            . ' | ' . $record->kelas
+                                            . ' | Semester ' . $record->semester,
+                                    ]);
                             })
                             ->required(),
 
