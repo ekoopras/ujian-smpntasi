@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\BankSoalResource\Pages;
 use App\Filament\Resources\BankSoalResource\RelationManagers;
 use App\Models\BankSoal;
+use App\Models\Mapel;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -33,20 +34,27 @@ class BankSoalResource extends Resource
                         Forms\Components\Select::make('mapel_id')
                             ->label('Mapel')
                             ->options(function () {
-                                // Super admin bisa pilih semua mapel
-                                if (auth()->user()->isSuperAdmin()) {
-                                    return \App\Models\Mapel::all()->pluck('mapel', 'id');
+
+                                $user = auth()->user();
+
+                                if ($user->isSuperAdmin()) {
+                                    return \App\Models\Mapel::pluck('mapel', 'id');
                                 }
-                                // Guru otomatis hanya mapel mereka sendiri
-                                return \App\Models\Mapel::where('id', auth()->user()->mapel_id)
-                                    ->pluck('mapel', 'id');
+
+                                return $user->mapel()
+                                    ->pluck('mapel', 'mapels.id'); // penting!
                             })
                             ->default(function () {
-                                // Set default mapel guru
-                                if (!auth()->user()->isSuperAdmin()) {
-                                    return auth()->user()->mapel_id;
+
+                                $user = auth()->user();
+
+                                if (!$user->isSuperAdmin()) {
+                                    return $user->mapel()
+                                        ->select('mapels.id')
+                                        ->value('mapels.id');
                                 }
-                                return null; // super admin default kosong
+
+                                return null;
                             })
                             ->required(),
                         Forms\Components\Select::make('kelas')
