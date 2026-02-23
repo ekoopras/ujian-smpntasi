@@ -23,6 +23,7 @@ class NilaiResource extends Resource
     protected static ?string $model = Nilai::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static ?string $navigationLabel = 'Nilai Siswa';
 
     protected static ?string $navigationGroup = 'Manajemen Ujian';
 

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pesertas', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->string('nis')->unique();
+            $table->string('nis');
             $table->foreignId('kelase_id')->constrained()->cascadeOnDelete();
             $table->foreignId('ujian_id')->constrained()->cascadeOnDelete();
             $table->boolean('is_locked')->default(false);

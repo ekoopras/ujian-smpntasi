@@ -26,6 +26,7 @@ class UjianResource extends Resource
     protected static ?string $model = Ujian::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static ?string $navigationLabel = 'Ujian';
     protected static ?string $navigationGroup = 'Manajemen Ujian';
 
     public static function form(Form $form): Form
