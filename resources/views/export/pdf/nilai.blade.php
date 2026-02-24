@@ -34,7 +34,7 @@
             <tr>
                 <th>No</th>
                 <th>Nama</th>
-                <th>NIS</th>
+                <th>Nomor Absen</th>
                 <th>Kelas</th>
                 <th>Mapel</th>
                 <th>Nilai</th>
@@ -45,7 +45,7 @@
                 <tr>
                     <td>{{ $i + 1 }}</td>
                     <td>{{ $nilai->peserta->nama }}</td>
-                    <td>{{ $nilai->peserta->nis }}</td>
+                    <td>{{ $nilai->peserta->nomor_absen }}</td>
                     <td>{{ $nilai->peserta->kelase->kelas }}</td>
                     <td>{{ $nilai->peserta->ujian->mapel->mapel }}</td>
                     <td>{{ $nilai->total_skor }}</td>

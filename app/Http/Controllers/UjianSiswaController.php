@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 class UjianSiswaController extends Controller
 {
 
-    //view
+    // VIEW INDEX
     public function form()
     {
         return view('ujian.index', [
@@ -22,29 +22,7 @@ class UjianSiswaController extends Controller
         ]);
     }
 
-    //cek-peserta-ujian
-    // public function cek(Request $request)
-    // {
-    //     $ujian = Ujian::where('kode_ujian', $request->kode_ujian)
-    //         ->where('kelase_id', $request->kelase_id)
-    //         ->firstOrFail();
-
-    //     // 🔎 Cek apakah siswa sudah pernah ikut ujian ini
-    //     $sudahIkut = Peserta::where('nis', $request->nis)
-    //         ->where('ujian_id', $ujian->id)
-    //         ->exists();
-
-    //     if ($sudahIkut) {
-    //         return redirect()->route('ujian.sudah')
-    //             ->with('error', 'Anda sudah mengikuti ujian mapel ini.');
-    //     }
-
-    //     return view('ujian.review', [
-    //         'data' => $request->all(),
-    //         'ujian' => $ujian,
-    //     ]);
-    // }
-
+    // VIEW CEK
     public function cek(Request $request)
     {
         // ambil ujian berdasarkan kode dan kelas
@@ -61,15 +39,12 @@ class UjianSiswaController extends Controller
                 ->with('error', 'Kode ujian tidak ditemukan atau tidak sesuai dengan kelas.');
         }
 
-        // cek apakah sudah ikut
-        $sudahIkut = Peserta::where('nis', $request->nis)
-            ->where('ujian_id', $ujian->id)
-            ->exists();
+        $ujian = Ujian::where('kode_ujian', $request->kode_ujian)
+            ->where('is_active', true)
+            ->first();
 
-        if ($sudahIkut) {
-            return back()
-                ->withInput()
-                ->with('error', 'Anda sudah mengikuti ujian mapel ini.');
+        if (!$ujian) {
+            return back()->with('error', 'Kode ujian tidak valid / belum aktif');
         }
 
         // ambil kelas yang dipilih
@@ -85,12 +60,12 @@ class UjianSiswaController extends Controller
     }
 
 
-    //mulai ujian
+    // MULAI UJIAN
     public function mulai(Request $request)
     {
         $peserta = Peserta::create([
             'nama' => $request->nama,
-            'nis' => $request->nis,
+            'nomor_absen' => $request->nomor_absen,
             'kelase_id' => $request->kelase_id,
             'ujian_id' => $request->ujian_id,
             'started_at' => now(),
@@ -121,7 +96,7 @@ class UjianSiswaController extends Controller
     }
 
 
-    //submit jawaban
+    // SUBMIT JAWABAN
     public function submit(Request $request)
     {
         if (Nilai::where('peserta_id', $request->peserta_id)->exists()) {
@@ -154,10 +129,16 @@ class UjianSiswaController extends Controller
             'total_skor' => $total,
         ]);
 
-        return redirect('/ujian-selesai');
+        // return redirect('/ujian-selesai');
+        return redirect()->route('ujian.selesai');
     }
 
-    //cek jawaban
+    public function selesai()
+    {
+        return view('ujian.selesai');
+    }
+
+    // CEK JAWABAN
     protected function cekJawaban(Soal $soal, $jawaban)
     {
         $skor = 0;
@@ -187,7 +168,7 @@ class UjianSiswaController extends Controller
         return $skor;
     }
 
-    //lock keamanan
+    // LOCK KEAMANAN
     public function lock(Request $request)
     {
         Peserta::where('id', $request->peserta_id)->update([
@@ -198,7 +179,7 @@ class UjianSiswaController extends Controller
         return response()->json(['locked' => true]);
     }
 
-    //unlock keamanan
+    // UNLOCK KEAMANAN
     public function unlock(Request $request)
     {
         $peserta = Peserta::findOrFail($request->peserta_id);

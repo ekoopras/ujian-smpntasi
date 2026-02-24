@@ -22,7 +22,7 @@ class NilaiExport implements FromCollection
         return $this->query->get()->map(function ($nilai) {
             return [
                 'Nama'  => $nilai->peserta->nama,
-                'NIS'   => $nilai->peserta->nis,
+                'NomorAbsen'   => $nilai->peserta->nomor_absen,
                 'Kelas' => $nilai->peserta->kelase->kelas,
                 'Mapel' => $nilai->peserta->ujian->mapel->mapel,
                 'Nilai' => $nilai->total_skor,

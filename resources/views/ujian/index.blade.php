@@ -47,9 +47,9 @@
 
                             {{-- NIS --}}
                             <div class="mb-2">
-                                <label class="form-label fw-semibold" style="font-size: 15px">NIS</label>
-                                <input type="text" name="nis" class="form-control" placeholder="Nomor Induk Siswa"
-                                    value="{{ old('nis') }}" required>
+                                <label class="form-label fw-semibold" style="font-size: 15px">Nomor Absen</label>
+                                <input type="text" name="nomor_absen" class="form-control"
+                                    placeholder="Nomor Induk Siswa" value="{{ old('nomor_absen') }}" required>
                             </div>
 
                             {{-- Kelas --}}

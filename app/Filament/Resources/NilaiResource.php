@@ -43,8 +43,8 @@ class NilaiResource extends Resource
                     ->label('Nama Siswa')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('peserta.nis')
-                    ->label('NIS'),
+                Tables\Columns\TextColumn::make('peserta.nomor_absen')
+                    ->label('Nomor Absen'),
 
                 Tables\Columns\TextColumn::make('peserta.kelase.kelas')
                     ->label('Kelas')

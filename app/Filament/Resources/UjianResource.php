@@ -130,6 +130,13 @@ class UjianResource extends Resource
                             ->suffix('menit')
                             ->required(),
 
+                        Forms\Components\Toggle::make('is_active')
+                            ->label('Status Aktif')
+                            ->onColor('success')
+                            ->offColor('danger')
+                            ->inline(false)
+                            ->default(false),
+
 
                     ])->columns(3),
 

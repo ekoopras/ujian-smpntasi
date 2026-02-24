@@ -17,6 +17,7 @@ class Ujian extends Model
         'kode_ujian',
         'durasi_menit',
         'unlock_code',
+        'is_active',
     ];
 
     // public function kelase()

@@ -33,8 +33,8 @@ class PesertasRelationManager extends RelationManager
                     ->label('Nama Siswa')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('nis')
-                    ->label('NIS'),
+                Tables\Columns\TextColumn::make('nomor_absen')
+                    ->label('Absen'),
 
                 Tables\Columns\TextColumn::make('kelase.kelas')
                     ->label('Kelas'),

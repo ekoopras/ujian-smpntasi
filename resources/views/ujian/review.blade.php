@@ -44,8 +44,8 @@
                                 </li>
 
                                 <li class="list-group-item px-0">
-                                    <small class="text-muted">NIS</small><br>
-                                    <span class="fw-semibold">{{ $data['nis'] }}</span>
+                                    <small class="text-muted">Nomor Absen</small><br>
+                                    <span class="fw-semibold">{{ $data['nomor_absen'] }}</span>
                                 </li>
 
                                 <li class="list-group-item px-0">
