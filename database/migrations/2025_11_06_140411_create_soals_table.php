@@ -16,11 +16,9 @@ return new class extends Migration
             $table->foreignId('bank_soal_id')->constrained('bank_soals')->cascadeOnDelete();
             $table->text('soal');
             $table->string('gambar')->nullable();
-
             $table->json('multiple_choice')->nullable();
             $table->json('matching')->nullable();
             $table->string('tipe_soal');
-
             $table->timestamps();
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BankSoalResource\RelationManagers;
 
+use App\Exports\SoalExport;
 use App\Imports\MultipleChoiceImport;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
@@ -242,6 +243,18 @@ class SoalsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
+                Tables\Actions\Action::make('export')
+                    ->label('Export Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('warning')
+                    ->action(function ($livewire) {
+                        $bankSoalId = $livewire->getOwnerRecord()->id;
+
+                        return Excel::download(
+                            new SoalExport($bankSoalId),
+                            'soal-bank-' . $bankSoalId . '.xlsx'
+                        );
+                    }),
                 Tables\Actions\Action::make('import')
                     ->label('Import Soal')
                     ->icon('heroicon-o-arrow-up-tray')
