@@ -176,6 +176,14 @@ class UjianResource extends Resource
                 Tables\Columns\TextColumn::make('durasi_menit')
                     ->label('Durasi')
                     ->suffix(' menit'),
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->label('Status Aktif')
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->beforeStateUpdated(function ($record, $state) {
+                        // (Opsional) Tambahkan logika di sini jika ingin 
+                        // melakukan sesuatu sebelum data disimpan
+                    }),
                 // Tables\Columns\TextColumn::make('created_at')
                 //     ->dateTime('d M Y'),
             ])

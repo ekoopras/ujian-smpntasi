@@ -4,7 +4,8 @@
 
 @section('content')
 
-    <form action="/ujian/submit" method="POST" id="formUjian">
+    {{-- <form action="/ujian/submit" method="POST" id="formUjian"> --}}
+    <form id="formUjian" action="{{ route('ujian.submit') }}" method="POST">
         @csrf
         <input type="hidden" name="peserta_id" value="{{ $peserta->id }}">
 
@@ -40,7 +41,8 @@
 
                         @foreach ($soals as $index => $soal)
                             <div class="soal-item {{ $index === 0 ? '' : 'd-none' }}" data-index="{{ $index }}"
-                                data-soal-id="{{ $soal->id }}">
+                                data-soal-id="{{ $soal->id }}" {{-- Tambahkan ini untuk menyimpan status ragu di level elemen --}}
+                                data-ragu="{{ isset($raguTerarsip[$soal->id]) && $raguTerarsip[$soal->id] ? '1' : '0' }}">
 
                                 <div class="card shadow-sm border-0 rounded-4 mb-4">
                                     <div class="card-body p-3">
@@ -65,7 +67,7 @@
 
 
                                 {{-- JAWABAN --}}
-                                @if ($soal->tipe_soal === 'multiple_choice')
+                                {{-- @if ($soal->tipe_soal === 'multiple_choice')
                                     @foreach ($soal->multiple_choice ?? [] as $opsi)
                                         <div class="card shadow-sm border-0 rounded-4 mb-2">
                                             <div class="card-body">
@@ -88,27 +90,46 @@
                                             </div>
                                         </div>
                                     @endforeach
+                                @endif --}}
+
+                                {{-- JAWABAN --}}
+                                @if ($soal->tipe_soal === 'multiple_choice')
+                                    @foreach ($soal->multiple_choice ?? [] as $opsi)
+                                        <div class="card shadow-sm border-0 rounded-4 mb-2">
+                                            <div class="card-body">
+                                                <label class="form-check m-0">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="jawaban[{{ $soal->id }}][]" value="{{ $opsi['opsi'] }}"
+                                                        {{-- TAMBAHKAN KODE DI BAWAH INI --}}
+                                                        @if (isset($jawabanTerarsip[$soal->id]) && in_array($opsi['opsi'], (array) $jawabanTerarsip[$soal->id])) checked @endif>
+
+                                                    <span class="form-check-label ms-2">
+                                                        {{ $opsi['opsi'] }}. {{ $opsi['jawaban'] }}
+
+                                                        @if (!empty($opsi['jawaban_img']))
+                                                            <br>
+                                                            <img src="{{ asset('storage/' . $opsi['jawaban_img']) }}"
+                                                                width="120">
+                                                        @endif
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 @endif
 
                                 {{-- MATCHING --}}
+                                {{-- MATCHING --}}
                                 @if ($soal->tipe_soal === 'matching')
-                                    @php
-                                        $kananList = collect($soal->matching)->pluck('kanan')->unique();
-                                    @endphp
-
                                     <div class="card shadow-sm border-0 rounded-4">
                                         <div class="card-body">
-
                                             <div class="table-responsive">
-                                                <table class="table table-bordered text-center align-middle">
-
-                                                    {{-- HEADER --}}
+                                                <table class="table table-bordered align-middle">
+                                                    {{-- HEADER: Hanya perlu 2 kolom --}}
                                                     <thead class="table-light">
                                                         <tr>
-                                                            <th class="text-start">Soal</th>
-                                                            @foreach ($soal->kananList as $kanan)
-                                                                <th>{{ $kanan }}</th>
-                                                            @endforeach
+                                                            <th class="text-start" style="width: 40%;">Soal</th>
+                                                            <th class="text-start">Pasangan Jawaban</th>
                                                         </tr>
                                                     </thead>
 
@@ -119,22 +140,24 @@
                                                                 <td class="text-start fw-semibold">
                                                                     {{ $match['kiri'] }}
                                                                 </td>
-
-                                                                @foreach ($soal->kananList as $kanan)
-                                                                    <td class="text-center">
-                                                                        <input type="radio" class="form-check-input"
-                                                                            name="jawaban[{{ $soal->id }}][{{ $i }}]"
-                                                                            value="{{ $kanan }}" required>
-                                                                    </td>
-                                                                @endforeach
+                                                                <td class="text-start">
+                                                                    <select class="form-select select-autosave"
+                                                                        name="jawaban[{{ $soal->id }}][{{ $i }}]"
+                                                                        data-soal-id="{{ $soal->id }}" required>
+                                                                        <option value="">-- Pilih Pasangan --</option>
+                                                                        @foreach ($soal->kananList as $kanan)
+                                                                            <option value="{{ $kanan }}"
+                                                                                @if (isset($jawabanTerarsip[$soal->id][$i]) && $jawabanTerarsip[$soal->id][$i] === $kanan) selected @endif>
+                                                                                {{ $kanan }}
+                                                                            </option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
-
-
                                                 </table>
                                             </div>
-
                                         </div>
                                     </div>
                                 @endif
@@ -165,13 +188,16 @@
                 </div>
             </div>
 
-            <div id="lockScreen" class="lock-screen d-none">
+            <div id="lockScreen" class="lock-screen" style="display: none;">
                 <div class="lock-box">
                     <h4>UJIAN TERKUNCI 🔒</h4>
                     <p>Anda meninggalkan halaman ujian</p>
 
                     <input type="password" id="unlockCode" maxlength="6" class="form-control text-center my-3"
-                        placeholder="Kode 6 Digit" autocomplete="off" autocorrect="off" spellcheck="false">
+                        placeholder="Kode 6 Digit" autocomplete="off" autocorrect="off" spellcheck="false"
+                        onkeypress="handleUnlockKey(event)">
+
+                    <div id="msgError" class="text-danger mb-3" style="display:none; font-weight:bold;"></div>
 
                     <button type="button" class="btn btn-primary w-100" onclick="unlockUjian()">
                         Buka Kunci
@@ -183,17 +209,19 @@
         </div>
 
         {{-- OFFCANVAS NOMOR SOAL (MOBILE) --}}
-        <div class="offcanvas offcanvas-end d-lg-none offcanvas-soal" tabindex="-1" id="offcanvasNomorSoal">
-            <div class="offcanvas-header">
-                <h5 class="fw-bold">Nomor Soal</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-            </div>
+        <div id="modalNomor" class="custom-overlay" style="display: none;">
+            <div class="overlay-content">
+                <div class="header-modal d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold m-0" style="color: #333;">Pilih Nomor Soal</h5>
+                    <button type="button" class="btn-close" onclick="tutupModalNomor()"
+                        style="background-color: #eee; border: none; padding: 5px 10px; border-radius: 5px;"></button>
+                </div>
 
-            <div class="offcanvas-body">
-                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <div class="d-flex flex-wrap justify-content-center" style="gap: 10px; display: flex; flex-wrap: wrap;">
                     @foreach ($soals as $i => $s)
-                        <button class="btn btn-outline-primary nomor-soal-btn" onclick="goToSoal({{ $i }})"
-                            data-bs-dismiss="offcanvas" data-soal="{{ $s->id }}" type="button">
+                        <button type="button" class="btn btn-outline-primary nomor-soal-btn"
+                            id="btn-nomor-{{ $i }}" onclick="pindahSoalDariModal({{ $i }})"
+                            style="width: 50px; height: 50px; margin: 5px; font-weight: bold; border: 1px solid #0d6efd;">
                             {{ $i + 1 }}
                         </button>
                     @endforeach
@@ -232,8 +260,7 @@
                     </div>
 
                     <div class="col-3 d-lg-none">
-                        <button class="btn btn-primary w-100" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasNomorSoal" type="button">
+                        <button type="button" class="btn btn-primary w-100" onclick="bukaMenuNomor()">
                             Nomor
                         </button>
                     </div>
@@ -269,15 +296,44 @@
             background: rgba(255, 255, 255, .2);
         }
 
-        .nomor-soal-btn {
-            width: 48px;
-            height: 48px;
-            font-weight: 600;
+
+        .custom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10001;
+            /* Pastikan di atas lock screen jika perlu */
+            display: none;
+            overflow-y: auto;
+            /* Biar bisa discroll kalau soalnya banyak */
         }
 
-        .offcanvas-soal {
-            --bs-offcanvas-width: 260px;
+        .overlay-content {
+            background: #ffffff;
+            width: 90%;
+            margin: 50px auto;
+            /* Jarak dari atas */
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            min-height: 200px;
+            /* Pastikan ada tinggi minimal */
         }
+
+        /* Memastikan tombol nomor terlihat jelas */
+        .nomor-soal-btn {
+            display: inline-block !important;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            background-color: transparent;
+            color: #0d6efd;
+        }
+
 
         .timer-floating {
             position: fixed;
@@ -298,12 +354,13 @@
 
         .lock-screen {
             position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, .85);
+            /* Ganti inset: 0 menjadi manual agar terbaca browser lama */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
             z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .lock-box {
@@ -312,80 +369,75 @@
             border-radius: 16px;
             width: 320px;
             text-align: center;
+            color: #333;
+            /* Pastikan teks tidak putih */
+
+            /* Trik posisi tengah paling stabil untuk Android Jadul */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            /* Untuk Chrome lama */
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
         }
     </style>
 
+
+
     <script>
-        const DURASI_MENIT = {{ $durasiMenit }};
-    </script>
+        // ------- JS TIMMER ------- //
 
+        // 1. Gunakan var (Chrome v55 tidak stabil dengan const/let)
+        // PHP mengirim timestamp (detik), JS butuh milidetik (dikali 1000)
+        var targetSelesai = {{ $waktuSelesai }} * 1000;
 
-    {{-- SCRIPT --}}
-    <script>
-        let currentIndex = 0;
-        const soalItems = document.querySelectorAll('.soal-item');
+        function jalankanTimer() {
+            // 2. Ambil waktu sekarang dari sistem
+            var sekarang = new Date().getTime();
+            var sisaWaktu = targetSelesai - sekarang;
 
-        function updateButtons() {
-            const isLast = currentIndex === soalItems.length - 1;
+            // 3. Jika waktu habis
+            if (sisaWaktu <= 0) {
+                clearInterval(intervalUjian);
+                document.getElementById('timerText').innerHTML = "00:00";
 
-            document.getElementById('nextWrapper')
-                .classList.toggle('d-none', isLast);
-
-            document.getElementById('submitWrapper')
-                .classList.toggle('d-none', !isLast);
-        }
-
-        function showSoal(index) {
-            soalItems.forEach((el, i) => {
-                el.classList.toggle('d-none', i !== index);
-            });
-
-            currentIndex = index;
-            updateButtons(); // 🔥 panggil di sini
-        }
-
-        function nextSoal() {
-            if (currentIndex < soalItems.length - 1) {
-                showSoal(currentIndex + 1);
-            }
-        }
-
-        function prevSoal() {
-            if (currentIndex > 0) {
-                showSoal(currentIndex - 1);
-            }
-        }
-
-        function goToSoal(index) {
-            showSoal(index);
-        }
-
-        // initial load
-        updateButtons();
-
-        /* TIMER */
-        let waktu = DURASI_MENIT * 60; // menit → detik
-
-        const timerInterval = setInterval(() => {
-
-            let menit = Math.floor(waktu / 60);
-            let detik = waktu % 60;
-
-            document.getElementById('timerText').innerText =
-                String(menit).padStart(2, '0') + ':' + String(detik).padStart(2, '0');
-
-            if (waktu <= 0) {
-                clearInterval(timerInterval);
-
-                // auto submit ketika waktu habis
+                // Auto submit
                 document.getElementById('formUjian').submit();
+                return;
             }
 
-            waktu--;
+            // 4. Hitung menit dan detik secara manual
+            var menit = Math.floor((sisaWaktu % (1000 * 60 * 60)) / (1000 * 60));
+            var detik = Math.floor((sisaWaktu % (1000 * 60)) / 1000);
+
+            // 5. Format 00:00 (Browser lama tidak dukung .padStart)
+            var tampilMenit = menit < 10 ? "0" + menit : menit;
+            var tampilDetik = detik < 10 ? "0" + detik : detik;
+
+            // 6. Update tampilan
+            document.getElementById('timerText').innerHTML = tampilMenit + ":" + tampilDetik;
+        }
+
+        // Jalankan setiap 1 detik
+        var intervalUjian = setInterval(function() {
+            jalankanTimer();
         }, 1000);
+
+        // Jalankan langsung saat halaman load agar tidak ada delay 1 detik
+        jalankanTimer();
+
+        // Tambahan agar saat layar menyala kembali, timer langsung update
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // Panggil fungsi update timer secara instan tanpa menunggu detik berikutnya
+                jalankanTimer();
+            }
+        });
     </script>
 
     <script>
+        // -------- JS JAWAB SOAL ----- //
         document.addEventListener('change', function() {
 
             document.querySelectorAll('.soal-item').forEach(soal => {
@@ -420,6 +472,7 @@
 
 
     <script>
+        // ----- JS TOMBOL RAGU-RAGU ----- //
         function toggleRagu() {
 
             const soal = document.querySelector('.soal-item:not(.d-none)');
@@ -456,31 +509,31 @@
     </script>
 
     <script>
+        // ---- JS LOCK UJIAN ----- ///
+        // 1. Fungsi menampilkan lock screen (Gunakan .style agar lebih stabil)
         function showLockScreen() {
-            document.getElementById('lockScreen').classList.remove('d-none');
+            var ls = document.getElementById('lockScreen');
+            if (ls) ls.style.display = 'block';
         }
-    </script>
 
-    <script>
-        let ujianLocked = false;
+        // 2. Logika Deteksi Pelanggaran
+        var ujianLocked = false;
 
-        // ketika tab ditinggalkan
         document.addEventListener("visibilitychange", function() {
             if (document.hidden) {
                 lockUjian();
             }
         });
 
-        // ketika window blur (alt+tab, minimize)
         window.addEventListener("blur", function() {
             lockUjian();
         });
 
         function lockUjian() {
             if (ujianLocked) return;
-
             ujianLocked = true;
 
+            // AJAX menggunakan fetch (masih didukung Chrome 55, tapi gunakan var)
             fetch("/ujian/lock", {
                 method: "POST",
                 headers: {
@@ -494,64 +547,432 @@
 
             showLockScreen();
         }
+
+        // 3. Fungsi menangani tombol ENTER pada input kode
+        function handleUnlockKey(e) {
+            var key = e.keyCode || e.which;
+            if (key === 13) {
+                if (e.preventDefault) e.preventDefault(); // Stop submit form utama
+                unlockUjian();
+                return false;
+            }
+        }
+
+        function unlockUjian() {
+            var input = document.getElementById('unlockCode');
+            var code = input.value;
+
+            if (code === "") {
+                alert("Masukkan kode!");
+                return;
+            }
+
+            fetch("/ujian/unlock", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        peserta_id: {{ $peserta->id }},
+                        code: code
+                    })
+                })
+                .then(function(res) {
+                    if (res.status === 200) {
+                        ujianLocked = false;
+                        input.value = "";
+                        document.getElementById('lockScreen').style.display = 'none';
+                    } else {
+                        input.value = "";
+                        alert("Kode Salah!");
+                    }
+                })
+                .catch(function(err) {
+                    alert("Gagal terhubung ke server. Cek koneksi!");
+                });
+        }
+    </script>
+
+    <script>
+        // --- VARIABEL GLOBAL ---
+        var currentIndex = 0;
+        var soalItems = document.querySelectorAll('.soal-item');
+
+        // --- FUNGSI NAVIGASI (Yang sudah kita bahas sebelumnya) ---
+        function showSoal(index) {
+            /* ... kode fungsi showSoal Anda ... */
+        }
+
+        document.addEventListener('change', function(e) {
+            var target = e.target;
+
+            // Memastikan yang diklik adalah pilihan jawaban (input radio atau select)
+            if (target.name && target.name.indexOf('jawaban') !== -1) {
+
+                var soalContainer = target.closest('.soal-item');
+                var soalId = soalContainer.getAttribute('data-soal-id');
+                var pesertaId = "{{ $peserta->id }}";
+
+                var dataJawaban = {};
+
+                // 1. AMBIL DATA DARI RADIO BUTTON (Untuk Multiple Choice)
+                var inputs = soalContainer.querySelectorAll('input:checked');
+                for (var i = 0; i < inputs.length; i++) {
+                    var input = inputs[i];
+                    var nameParts = input.name.split('[');
+                    if (nameParts.length > 2) {
+                        var subIndex = nameParts[2].replace(']', '');
+                        if (subIndex === '') {
+                            if (!Array.isArray(dataJawaban)) dataJawaban = [];
+                            dataJawaban.push(input.value);
+                        } else {
+                            if (typeof dataJawaban !== 'object' || Array.isArray(dataJawaban)) dataJawaban = {};
+                            dataJawaban[subIndex] = input.value;
+                        }
+                    }
+                }
+
+                // 2. AMBIL DATA DARI SELECT DROPDOWN (Untuk Matching)
+                var selects = soalContainer.querySelectorAll('select');
+                if (selects.length > 0) {
+                    if (typeof dataJawaban !== 'object' || Array.isArray(dataJawaban)) dataJawaban = {};
+                    for (var j = 0; j < selects.length; j++) {
+                        var sel = selects[j];
+                        var selNameParts = sel.name.split('[');
+                        if (selNameParts.length > 2 && sel.value !== "") {
+                            var selSubIndex = selNameParts[2].replace(']', '');
+                            dataJawaban[selSubIndex] = sel.value;
+                        }
+                    }
+                }
+
+                // Kirim ke server via AJAX
+                // fetch("{{ route('ujian.autosave') }}", {
+                //         method: "POST",
+                //         headers: {
+                //             "Content-Type": "application/json",
+                //             "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                //         },
+                //         body: JSON.stringify({
+                //             peserta_id: pesertaId,
+                //             soal_id: soalId,
+                //             jawaban: dataJawaban
+                //         })
+                //     })
+                //     .then(function(res) {
+                //         return res.json();
+                //     })
+                //     .then(function(data) {
+                //         console.log("Auto-save berhasil:", dataJawaban);
+                //         if (typeof updateWarnaNomor === 'function') {
+                //             updateWarnaNomor();
+                //         }
+                //     })
+                //     .catch(function(err) {
+                //         console.error("Gagal simpan otomatis:", err);
+                //     });
+                // Ganti bagian fetch Anda dengan ini:
+                $.ajax({
+                    url: "{{ route('ujian.autosave') }}",
+                    method: "POST",
+                    dataType: "json", // Pastikan menerima respon JSON
+                    data: {
+                        _token: "{{ csrf_token() }}", // Token keamanan Laravel
+                        peserta_id: pesertaId,
+                        soal_id: soalId,
+                        jawaban: dataJawaban
+                    },
+                    success: function(response) {
+                        console.log("Auto-save berhasil (jQuery):", dataJawaban);
+                        if (typeof updateWarnaNomor === 'function') {
+                            updateWarnaNomor();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Gagal simpan otomatis (jQuery):", error);
+                        // Alert sederhana untuk testing di Android lama
+                        // alert("Koneksi tidak stabil, jawaban gagal terkirim!");
+                    }
+                });
+            }
+        });
+
+        // --- FUNGSI UPDATE WARNA (Wajib ada agar nomor berubah warna saat diklik) ---
+        function updateWarnaNomor() {
+            /* ... kode fungsi updateWarnaNomor yang menggunakan localStorage tadi ... */
+        }
+
+        // Jalankan saat pertama kali buka agar jawaban dari database langsung mewarnai nomor
+        window.onload = function() {
+            updateWarnaNomor();
+        };
     </script>
 
     {{-- <script>
-        function unlockUjian() {
-            const code = document.getElementById('unlockCode').value;
+        var currentIndex = 0;
+        var soalItems = document.querySelectorAll('.soal-item');
 
-            fetch("/ujian/unlock", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        peserta_id: {{ $peserta->id }},
-                        code: code
-                    })
-                })
-                .then(res => {
-                    if (res.ok) {
-                        ujianLocked = false;
-                        document.getElementById('lockScreen').classList.add('d-none');
-                    } else {
-                        alert("Kode salah!");
-                    }
-                });
+        // --- 1. NAVIGASI ---
+        function showSoal(index) {
+            if (index < 0 || index >= soalItems.length) return;
+            $('.soal-item').hide();
+            $(soalItems[index]).show();
+            currentIndex = index;
         }
+
+        // --- 2. LOGIKA SIMPAN (DATABASE + LOCALSTORAGE) ---
+        $(document).on('change', 'input[type="radio"], select', function() {
+            var container = $(this).closest('.soal-item');
+            var soalId = container.attr('data-soal-id');
+            var pesertaId = "{{ $peserta->id }}";
+            var nilai = $(this).val();
+
+            // SIMPAN KE LOCALSTORAGE (Instan, anti-refresh)
+            // Format kunci: jawaban_peserta[ID]_soal[ID]
+            localStorage.setItem('ans_' + pesertaId + '_' + soalId, nilai);
+
+            // KIRIM KE SERVER (Background)
+            $.ajax({
+                url: "{{ route('ujian.autosave') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    peserta_id: pesertaId,
+                    soal_id: soalId,
+                    jawaban: nilai
+                },
+                success: function() {
+                    console.log("Server: Tersimpan");
+                    updateWarnaNomor();
+                },
+                error: function() {
+                    console.log("Server: Gagal, tapi sudah ada di LocalStorage");
+                }
+            });
+
+            updateWarnaNomor();
+        });
+
+        // --- 3. RECOVERY (PENTING: Ambil jawaban saat refresh) ---
+        function loadJawabanDariStorage() {
+            var pesertaId = "{{ $peserta->id }}";
+
+            $('.soal-item').each(function() {
+                var soalId = $(this).attr('data-soal-id');
+                var savedValue = localStorage.getItem('ans_' + pesertaId + '_' + soalId);
+
+                if (savedValue) {
+                    // Set Radio
+                    $(this).find('input[value="' + savedValue + '"]').prop('checked', true);
+                    // Set Select
+                    $(this).find('select').val(savedValue);
+                }
+            });
+            updateWarnaNomor();
+        }
+
+        // --- 4. UPDATE WARNA ---
+        function updateWarnaNomor() {
+            $('.btn-nomor').each(function() {
+                var nomor = $(this).data('nomor');
+                var soalKontainer = $('.soal-item[data-nomor="' + nomor + '"]');
+
+                var terisi = soalKontainer.find('input:checked').length > 0 ||
+                    soalKontainer.find('select').val() !== "";
+
+                if (terisi) {
+                    $(this).addClass('btn-primary text-white').removeClass('btn-outline-primary');
+                }
+            });
+        }
+
+        // --- 5. CLEANUP (Hapus storage saat klik SELESAI) ---
+        // Tambahkan id="formUjian" pada tag <form> Anda
+        $('#formUjian').on('submit', function() {
+            // Hapus semua data ujian siswa ini di HP setelah selesai
+            for (var key in localStorage) {
+                if (key.includes('ans_' + "{{ $peserta->id }}")) {
+                    localStorage.removeItem(key);
+                }
+            }
+        });
+
+        $(document).ready(function() {
+            loadJawabanDariStorage(); // Ambil data dari HP dulu
+            showSoal(0);
+
+            // Anti-Cache Android
+            window.onpageshow = function(event) {
+                if (event.persisted) window.location.reload();
+            };
+        });
     </script> --}}
+
     <script>
-        function unlockUjian() {
-            const input = document.getElementById('unlockCode');
-            const code = input.value;
+        // --- 1. INISIALISASI (Hanya satu kali) ---
+        var currentIndex = 0;
+        var soalItems = document.querySelectorAll('.soal-item');
 
-            fetch("/ujian/unlock", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        peserta_id: {{ $peserta->id }},
-                        code: code
-                    })
-                })
-                .then(res => {
-                    if (res.ok) {
-                        ujianLocked = false;
+        // --- 2. FUNGSI NAVIGASI UTAMA ---
+        function showSoal(index) {
+            // Pastikan index tidak keluar batas
+            if (index < 0 || index >= soalItems.length) return;
 
-                        // 🔥 KOSONGKAN INPUT
-                        input.value = "";
+            for (var i = 0; i < soalItems.length; i++) {
+                if (i === index) {
+                    soalItems[i].style.display = 'block';
+                    // Paksa hapus d-none agar muncul
+                    soalItems[i].className = soalItems[i].className.replace(/\bd-none\b/g, "");
+                } else {
+                    soalItems[i].style.display = 'none';
+                }
+            }
+            currentIndex = index;
+            updateButtons();
+            window.scrollTo(0, 0);
+        }
 
-                        document.getElementById('lockScreen').classList.add('d-none');
-                    } else {
-                        // 🔥 JUGA KOSONGKAN JIKA SALAH
-                        input.value = "";
-                        alert("Kode salah!");
+        function updateButtons() {
+            var isLast = currentIndex === soalItems.length - 1;
+            var nWrap = document.getElementById('nextWrapper');
+            var sWrap = document.getElementById('submitWrapper');
+
+            if (nWrap) nWrap.style.display = isLast ? 'none' : 'block';
+            if (sWrap) sWrap.style.display = !isLast ? 'none' : 'block';
+        }
+
+        function nextSoal() {
+            showSoal(currentIndex + 1);
+        }
+
+        function prevSoal() {
+            showSoal(currentIndex - 1);
+        }
+
+        function goToSoal(index) {
+            showSoal(index);
+        }
+
+        // --- 3. FUNGSI MODAL NOMOR (OVERLAY) ---
+        function bukaMenuNomor() {
+            var modal = document.getElementById('modalNomor');
+            if (modal) {
+                modal.style.display = 'block';
+            }
+        }
+
+        function tutupModalNomor() {
+            var modal = document.getElementById('modalNomor');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function pindahSoalDariModal(index) {
+            showSoal(index); // Pindah soal
+            tutupModalNomor(); // Tutup popup
+        }
+
+        // Jalankan pertama kali saat halaman dimuat
+        updateButtons();
+
+        // --- FUNGSI UPDATE SEMUA WARNA NOMOR ---
+        function updateWarnaNomor() {
+            var items = document.querySelectorAll('.soal-item');
+            // Ambil status ragu dari localStorage
+            var storageRagu = JSON.parse(localStorage.getItem('ragu_status') || '{}');
+
+            for (var i = 0; i < items.length; i++) {
+                var soal = items[i];
+                var soalId = soal.getAttribute('data-soal-id');
+                var btn = document.getElementById('btn-nomor-' + i); // Pastikan ID tombol nomor sesuai
+
+                if (!btn) continue;
+
+                // 1. Cek Status Ragu (Prioritas Warna Kuning)
+                var isRagu = storageRagu[soalId] === true || soal.getAttribute('data-ragu') === "1";
+
+                // 2. Cek Apakah Sudah Dijawab
+                var sudahDijawab = false;
+
+                // Cek jika ada Radio Button yang dicentang (Multiple Choice)
+                var inputs = soal.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+                for (var j = 0; j < inputs.length; j++) {
+                    if (inputs[j].checked) {
+                        sudahDijawab = true;
+                        break;
                     }
-                });
+                }
+
+                // Cek jika ada Select Dropdown yang dipilih (Matching)
+                // Kita anggap dijawab jika SEMUA select di soal tersebut sudah punya nilai (bukan empty string)
+                var selects = soal.querySelectorAll('select');
+                if (selects.length > 0) {
+                    var allSelected = true;
+                    for (var k = 0; k < selects.length; k++) {
+                        if (selects[k].value === "") {
+                            allSelected = false;
+                            break;
+                        }
+                    }
+                    // Jika ada minimal satu yang diisi, kita anggap mulai dijawab (warna biru)
+                    // Atau jika ingin harus semua terisi baru biru, gunakan 'allSelected'
+                    if (allSelected) sudahDijawab = true;
+                }
+
+                // 3. Terapkan Warna ke Tombol Navigasi
+                if (isRagu) {
+                    btn.style.backgroundColor = "#ffc107"; // Kuning
+                    btn.style.color = "#000";
+                    btn.style.borderColor = "#ffc107";
+                } else if (sudahDijawab) {
+                    btn.style.backgroundColor = "#0d6efd"; // Biru
+                    btn.style.color = "#fff";
+                    btn.style.borderColor = "#0d6efd";
+                } else {
+                    btn.style.backgroundColor = "transparent"; // Kosong
+                    btn.style.color = "#0d6efd";
+                    btn.style.borderColor = "#0d6efd";
+                }
+            }
+        }
+
+        // --- FUNGSI TOMBOL RAGU ---
+        function toggleRagu() {
+            var soalAktif = soalItems[currentIndex];
+            if (!soalAktif) return;
+
+            var statusRaguSaatIni = soalAktif.getAttribute('data-ragu');
+
+            // Toggle status (1 jadi 0, null/0 jadi 1)
+            if (statusRaguSaatIni === "1") {
+                soalAktif.setAttribute('data-ragu', "0");
+            } else {
+                soalAktif.setAttribute('data-ragu', "1");
+            }
+
+            // Update warna tombol nomor setelah status berubah
+            updateWarnaNomor();
+        }
+
+        // --- MONITOR PERUBAHAN JAWABAN ---
+        // Setiap kali siswa klik jawaban, update warna nomor
+        document.addEventListener('change', function() {
+            updateWarnaNomor();
+        });
+
+        // Panggil sekali saat pertama kali halaman dimuat
+        updateWarnaNomor();
+
+        function pindahSoalDariModal(index) {
+            showSoal(index);
+            tutupModalNomor();
+            updateWarnaNomor(); // Pastikan sinkron
         }
     </script>
+
+
+
 
 @endsection

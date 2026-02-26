@@ -46,10 +46,55 @@
                             </div>
 
                             {{-- NIS --}}
-                            <div class="mb-2">
+                            {{-- <div class="mb-2">
                                 <label class="form-label fw-semibold" style="font-size: 15px">Nomor Absen</label>
                                 <input type="text" name="nomor_absen" class="form-control"
                                     placeholder="Nomor Induk Siswa" value="{{ old('nomor_absen') }}" required>
+                            </div> --}}
+
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold" style="font-size: 15px">Nomor Absen</label>
+                                <select name="nomor_absen" class="form-select rounded-3" aria-label="Pilih Nomor Absen"
+                                    required>
+                                    <option value="" selected disabled>Pilih Nomor Absen</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="01">11</option>
+                                    <option value="02">12</option>
+                                    <option value="03">13</option>
+                                    <option value="04">14</option>
+                                    <option value="05">15</option>
+                                    <option value="06">16</option>
+                                    <option value="07">17</option>
+                                    <option value="08">18</option>
+                                    <option value="09">19</option>
+                                    <option value="10">20</option>
+                                    <option value="01">21</option>
+                                    <option value="02">22</option>
+                                    <option value="03">23</option>
+                                    <option value="04">24</option>
+                                    <option value="05">25</option>
+                                    <option value="06">26</option>
+                                    <option value="07">27</option>
+                                    <option value="08">28</option>
+                                    <option value="09">29</option>
+                                    <option value="10">30</option>
+                                    <option value="01">31</option>
+                                    <option value="02">32</option>
+                                    <option value="03">33</option>
+                                    <option value="04">34</option>
+                                    <option value="05">35</option>
+
+                                    {{-- Tambahkan seterusnya sesuai jumlah siswa --}}
+                                </select>
                             </div>
 
                             {{-- Kelas --}}

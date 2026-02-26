@@ -10,7 +10,15 @@ class Peserta extends Model
         'nama',
         'nomor_absen',
         'kelase_id',
-        'ujian_id'
+        'ujian_id',
+        'started_at',
+        'list_soal',
+
+    ];
+
+    protected $casts = [
+        'started_at' => 'datetime',
+        'is_locked' => 'boolean',
     ];
 
     public function ujian()
@@ -26,5 +34,9 @@ class Peserta extends Model
     public function kelase()
     {
         return $this->belongsTo(Kelase::class);
+    }
+    public function jawaban()
+    {
+        return $this->hasMany(Jawaban::class, 'peserta_id');
     }
 }

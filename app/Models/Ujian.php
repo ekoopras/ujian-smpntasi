@@ -18,6 +18,12 @@ class Ujian extends Model
         'durasi_menit',
         'unlock_code',
         'is_active',
+
+    ];
+
+    protected $casts = [
+        'started_at' => 'datetime',
+        'is_active' => 'boolean', // Wajib ada di sini
     ];
 
     // public function kelase()
@@ -44,6 +50,8 @@ class Ujian extends Model
     {
         return $this->belongsToMany(Kelase::class, 'kelas_ujian', 'ujian_id', 'kelase_id');
     }
+
+
 
 
     // GENERATE KODE UJIAN
