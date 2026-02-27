@@ -2,7 +2,7 @@
     <div class="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20 transition-colors duration-300">
 
         {{-- HEADER --}}
-        <div class="top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
+        <div class="top-0 z-50 bg-white dark:bg-gray-900 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 py-3">
                 <div class="flex justify-between items-center">
                     {{-- Left Section --}}
@@ -40,10 +40,10 @@
                         <div class="soal-card" x-data="{ open: false }">
                             {{-- Card Soal --}}
                             <div
-                                class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                                 {{-- Header Soal --}}
                                 <div
-                                    class="bg-gray-50 dark:bg-gray-800/50 px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+                                    class="bg-gray-50 dark:bg-gray-800 px-6 py-3 border-b border-gray-200 dark:border-gray-700">
                                     <div class="flex items-center justify-between">
                                         <span
                                             class="inline-flex items-center px-3 py-1 bg-primary-600 text-white text-xs font-semibold rounded-full">
@@ -95,7 +95,7 @@
                                                 @endphp
 
                                                 <div
-                                                    class="flex items-start gap-3 p-3 rounded-xl border-2 transition-all
+                                                    class="flex items-start gap-3 p-3 rounded-xl border transition-all
                                                     @if ($isCorrect) border-green-500 bg-green-50 dark:bg-green-900/20
                                                     @else
                                                         border-gray-100 dark:border-gray-700 hover:border-{{ $color }}-200 dark:hover:border-{{ $color }}-800 @endif">
@@ -110,7 +110,7 @@
                                                     </div>
 
                                                     {{-- Jawaban Text & Image --}}
-                                                    <div class="flex-grow text-gray-700 dark:text-gray-300">
+                                                    <div class="flex-grow text-gray-700 dark:text-gray-200">
                                                         <p>{{ $opsi['jawaban'] }}</p>
 
                                                         @if (!empty($opsi['jawaban_img']))

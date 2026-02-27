@@ -12,7 +12,7 @@ class ReviewBankSoal extends Page
 
     protected static string $view = 'filament.resources.bank-soal-resource.pages.review-bank-soal';
 
-    protected static ?string $title = 'Review Seluruh Soal';
+    protected static ?string $title = '';
 
     public $bankSoal;
 
