@@ -105,10 +105,14 @@ class BankSoalResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()->button(),
+                Tables\Actions\EditAction::make()->label('Add Soal')->button(),
+                Tables\Actions\Action::make('review_all')
+                    ->label('View Soal')
+                    ->button()
+                    ->icon('heroicon-o-document-magnifying-glass')
+                    ->color('success')
+                    ->url(fn(BankSoal $record): string => static::getUrl('review', ['record' => $record->id])),
                 Tables\Actions\DeleteAction::make()->button(),
-
-
 
             ])
             ->bulkActions([
@@ -131,6 +135,7 @@ class BankSoalResource extends Resource
             'index' => Pages\ListBankSoals::route('/'),
             //'create' => Pages\CreateBankSoal::route('/create'),
             'edit' => Pages\EditBankSoal::route('/{record}/edit'),
+            'review' => Pages\ReviewBankSoal::route('/{record}/review'),
         ];
     }
 

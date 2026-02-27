@@ -8,6 +8,7 @@ use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -37,11 +38,11 @@ class SoalsRelationManager extends RelationManager
 
                     Grid::make(3)
                         ->schema([
-                            Textarea::make('soal')
+                            RichEditor::make('soal')
                                 ->label('Soal')
                                 ->required()
-                                ->rows(7)
-                                ->autosize()
+                                //->rows(7)
+                                //->autosize()
                                 ->columnSpan(2),
 
                             Grid::make(1)
@@ -107,17 +108,6 @@ class SoalsRelationManager extends RelationManager
 
                 ])
                 ->columnSpanFull(),
-
-
-
-
-
-
-
-
-
-
-
 
             /* ===============================
              | MATCHING

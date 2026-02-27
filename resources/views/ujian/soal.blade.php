@@ -51,9 +51,14 @@
                                             Soal {{ $index + 1 }}
                                         </span>
 
-                                        <p class="lh-lg" style="font-size:18px">
+                                        {{-- <p class="lh-lg" style="font-size:18px">
                                             {!! nl2br(e($soal->soal)) !!}
-                                        </p>
+                                        </p> --}}
+
+                                        {{-- Teks Soal dengan RichEditor dan styling Bootstrap --}}
+                                        <div class="lh-lg" style="font-size: 16px;">
+                                            {!! $soal->soal !!}
+                                        </div>
 
                                         @if ($soal->gambar)
                                             <img src="{{ asset('storage/' . $soal->gambar) }}"
@@ -647,32 +652,6 @@
                     }
                 }
 
-                // Kirim ke server via AJAX
-                // fetch("{{ route('ujian.autosave') }}", {
-                //         method: "POST",
-                //         headers: {
-                //             "Content-Type": "application/json",
-                //             "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                //         },
-                //         body: JSON.stringify({
-                //             peserta_id: pesertaId,
-                //             soal_id: soalId,
-                //             jawaban: dataJawaban
-                //         })
-                //     })
-                //     .then(function(res) {
-                //         return res.json();
-                //     })
-                //     .then(function(data) {
-                //         console.log("Auto-save berhasil:", dataJawaban);
-                //         if (typeof updateWarnaNomor === 'function') {
-                //             updateWarnaNomor();
-                //         }
-                //     })
-                //     .catch(function(err) {
-                //         console.error("Gagal simpan otomatis:", err);
-                //     });
-                // Ganti bagian fetch Anda dengan ini:
                 $.ajax({
                     url: "{{ route('ujian.autosave') }}",
                     method: "POST",
@@ -708,106 +687,6 @@
             updateWarnaNomor();
         };
     </script>
-
-    {{-- <script>
-        var currentIndex = 0;
-        var soalItems = document.querySelectorAll('.soal-item');
-
-        // --- 1. NAVIGASI ---
-        function showSoal(index) {
-            if (index < 0 || index >= soalItems.length) return;
-            $('.soal-item').hide();
-            $(soalItems[index]).show();
-            currentIndex = index;
-        }
-
-        // --- 2. LOGIKA SIMPAN (DATABASE + LOCALSTORAGE) ---
-        $(document).on('change', 'input[type="radio"], select', function() {
-            var container = $(this).closest('.soal-item');
-            var soalId = container.attr('data-soal-id');
-            var pesertaId = "{{ $peserta->id }}";
-            var nilai = $(this).val();
-
-            // SIMPAN KE LOCALSTORAGE (Instan, anti-refresh)
-            // Format kunci: jawaban_peserta[ID]_soal[ID]
-            localStorage.setItem('ans_' + pesertaId + '_' + soalId, nilai);
-
-            // KIRIM KE SERVER (Background)
-            $.ajax({
-                url: "{{ route('ujian.autosave') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    peserta_id: pesertaId,
-                    soal_id: soalId,
-                    jawaban: nilai
-                },
-                success: function() {
-                    console.log("Server: Tersimpan");
-                    updateWarnaNomor();
-                },
-                error: function() {
-                    console.log("Server: Gagal, tapi sudah ada di LocalStorage");
-                }
-            });
-
-            updateWarnaNomor();
-        });
-
-        // --- 3. RECOVERY (PENTING: Ambil jawaban saat refresh) ---
-        function loadJawabanDariStorage() {
-            var pesertaId = "{{ $peserta->id }}";
-
-            $('.soal-item').each(function() {
-                var soalId = $(this).attr('data-soal-id');
-                var savedValue = localStorage.getItem('ans_' + pesertaId + '_' + soalId);
-
-                if (savedValue) {
-                    // Set Radio
-                    $(this).find('input[value="' + savedValue + '"]').prop('checked', true);
-                    // Set Select
-                    $(this).find('select').val(savedValue);
-                }
-            });
-            updateWarnaNomor();
-        }
-
-        // --- 4. UPDATE WARNA ---
-        function updateWarnaNomor() {
-            $('.btn-nomor').each(function() {
-                var nomor = $(this).data('nomor');
-                var soalKontainer = $('.soal-item[data-nomor="' + nomor + '"]');
-
-                var terisi = soalKontainer.find('input:checked').length > 0 ||
-                    soalKontainer.find('select').val() !== "";
-
-                if (terisi) {
-                    $(this).addClass('btn-primary text-white').removeClass('btn-outline-primary');
-                }
-            });
-        }
-
-        // --- 5. CLEANUP (Hapus storage saat klik SELESAI) ---
-        // Tambahkan id="formUjian" pada tag <form> Anda
-        $('#formUjian').on('submit', function() {
-            // Hapus semua data ujian siswa ini di HP setelah selesai
-            for (var key in localStorage) {
-                if (key.includes('ans_' + "{{ $peserta->id }}")) {
-                    localStorage.removeItem(key);
-                }
-            }
-        });
-
-        $(document).ready(function() {
-            loadJawabanDariStorage(); // Ambil data dari HP dulu
-            showSoal(0);
-
-            // Anti-Cache Android
-            window.onpageshow = function(event) {
-                if (event.persisted) window.location.reload();
-            };
-        });
-    </script> --}}
 
     <script>
         // --- 1. INISIALISASI (Hanya satu kali) ---

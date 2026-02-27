@@ -78,9 +78,11 @@ class UjianSiswaController extends Controller
         ]);
     }
 
+
     // FUNGSI 1: Proses pendaftaran peserta (Hanya dijalankan sekali saat klik 'Mulai')
     public function mulai(Request $request)
     {
+        $ujian = Ujian::findOrFail($request->ujian_id);
         // Cek apakah peserta sudah ada, jika belum buat baru
         $peserta = Peserta::firstOrCreate(
             [
@@ -95,10 +97,15 @@ class UjianSiswaController extends Controller
             ]
         );
 
-        // Kunci urutan soal jika belum ada
         if (!$peserta->list_soal) {
-            $soalIds = Soal::where('bank_soal_id', $request->ujian_id)->pluck('id')->toArray();
-            shuffle($soalIds); // Acak murni satu kali
+            // PERBAIKAN: Gunakan $ujian->bank_soal_id
+            $soalIds = Soal::where('bank_soal_id', $ujian->bank_soal_id)->pluck('id')->toArray();
+
+            if (empty($soalIds)) {
+                return back()->with('error', 'Maaf, bank soal ini belum memiliki butir soal.');
+            }
+
+            shuffle($soalIds);
             $peserta->update(['list_soal' => implode(',', $soalIds)]);
         }
 

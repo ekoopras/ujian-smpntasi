@@ -37,7 +37,6 @@ class SoalExport implements FromCollection, WithHeadings
 
         foreach ($soals as $soal) {
 
-
             // Baris utama (judul soal)
             $rows->push([
                 'soal' => $soal->soal,
@@ -81,6 +80,6 @@ class SoalExport implements FromCollection, WithHeadings
             }
         }
 
-        return new Collection($rows);
+        return $rows;
     }
 }
