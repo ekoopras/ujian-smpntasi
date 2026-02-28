@@ -21,5 +21,10 @@ class DatabaseSeeder extends Seeder
             'password' => 'admin',
             'role' => 'super_admin'
         ]);
+
+        $this->call([
+            KelaseSeeder::class,
+            MapelsSeeder::class,
+        ]);
     }
 }

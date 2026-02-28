@@ -8,6 +8,7 @@
     <form id="formUjian" action="{{ route('ujian.submit') }}" method="POST">
         @csrf
         <input type="hidden" name="peserta_id" value="{{ $peserta->id }}">
+        <input type="hidden" name="ujian_id" value="{{ $ujian->id }}">
 
         <div class="bg-soal">
 
@@ -263,6 +264,8 @@
                             Selesai
                         </button>
                     </div>
+
+
 
                     <div class="col-3 d-lg-none">
                         <button type="button" class="btn btn-primary w-100" onclick="bukaMenuNomor()">

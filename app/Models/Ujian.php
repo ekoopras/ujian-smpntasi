@@ -51,8 +51,10 @@ class Ujian extends Model
         return $this->belongsToMany(Kelase::class, 'kelas_ujian', 'ujian_id', 'kelase_id');
     }
 
-
-
+    public function nilai()
+    {
+        return $this->belongsTo(Nilai::class);
+    }
 
     // GENERATE KODE UJIAN
     protected static function boot()

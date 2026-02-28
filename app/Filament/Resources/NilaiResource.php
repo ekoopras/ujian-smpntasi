@@ -50,7 +50,7 @@ class NilaiResource extends Resource
                     ->label('Kelas')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('peserta.ujian.mapel.mapel')
+                Tables\Columns\TextColumn::make('ujian.mapel.mapel')
                     ->label('Ujian')
                     ->wrap(),
 
@@ -67,7 +67,7 @@ class NilaiResource extends Resource
 
                 SelectFilter::make('mapel')
                     ->label('Mapel')
-                    ->relationship('peserta.ujian.mapel', 'mapel')
+                    ->relationship('ujian.mapel', 'mapel')
                     ->visible(fn() => auth()->user()->isSuperAdmin()),
             ])
             ->headerActions([
@@ -149,7 +149,7 @@ class NilaiResource extends Resource
         $query = parent::getEloquentQuery();
 
         if (!auth()->user()->isSuperAdmin()) {
-            $query->whereHas('peserta.ujian', function ($q) {
+            $query->whereHas('ujian', function ($q) {
                 $q->whereIn(
                     'mapel_id',
                     auth()->user()->mapel()->pluck('mapels.id')

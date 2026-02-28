@@ -28,6 +28,7 @@ class UjianSiswaController extends Controller
     {
         // ambil ujian berdasarkan kode dan kelas
         $ujian = Ujian::where('kode_ujian', $request->kode_ujian)
+            ->where('is_active', true)
             ->whereHas('kelase', function ($q) use ($request) {
                 $q->where('kelases.id', $request->kelase_id);
             })
@@ -40,16 +41,21 @@ class UjianSiswaController extends Controller
                 ->with('error', 'Kode ujian tidak ditemukan atau tidak sesuai dengan kelas.');
         }
 
-        $ujian = Ujian::where('kode_ujian', $request->kode_ujian)
-            ->where('is_active', true)
-            ->first();
+        // $ujian = Ujian::where('kode_ujian', $request->kode_ujian)
+        //     ->where('is_active', true)
+        //     ->first();
 
-        if (!$ujian) {
-            return back()->with('error', 'Kode ujian tidak valid / belum aktif');
-        }
+        // if (!$ujian) {
+        //     return back()->with('error', 'Kode ujian tidak valid / belum aktif');
+        // }
 
-        $peserta = \DB::table('pesertas')
-            ->where('nomor_absen', $request->nomor_absen)
+        // $peserta = \DB::table('pesertas')
+        //     ->where('nomor_absen', $request->nomor_absen)
+        //     ->where('kelase_id', $request->kelase_id)
+        //     ->orderBy('id', 'ASC')
+        //     ->first();
+
+        $peserta = Peserta::where('nomor_absen', $request->nomor_absen)
             ->where('kelase_id', $request->kelase_id)
             ->first();
 
@@ -57,7 +63,13 @@ class UjianSiswaController extends Controller
         if ($peserta) {
             $sudahAdaNilai = \DB::table('nilais')
                 ->where('peserta_id', $peserta->id)
+                ->where('ujian_id', $ujian->id)
                 ->exists();
+            // dd([
+            //     'ID_Peserta_Ditemukan' => $peserta->id,
+            //     'ID_Ujian_Ditemukan' => $ujian->id,
+            //     'Cek_di_Tabel_Nilai' => \DB::table('nilais')->where('peserta_id', $peserta->id)->where('ujian_id', $ujian->id)->first()
+            // ]);
 
             if ($sudahAdaNilai) {
                 return back()
@@ -83,19 +95,36 @@ class UjianSiswaController extends Controller
     public function mulai(Request $request)
     {
         $ujian = Ujian::findOrFail($request->ujian_id);
+
         // Cek apakah peserta sudah ada, jika belum buat baru
         $peserta = Peserta::firstOrCreate(
             [
                 'nomor_absen' => $request->nomor_absen,
-                'ujian_id' => $request->ujian_id,
                 'kelase_id' => $request->kelase_id,
             ],
             [
                 'nama' => $request->nama,
-                'started_at' => now(), // Waktu dikunci di sini
+                //'started_at' => now(), // Waktu dikunci di sini
                 'is_locked' => false,
             ]
         );
+
+        // LOGIKA KRUSIAL: Jika siswa pindah mata pelajaran/ujian
+        if ($peserta->ujian_id != $ujian->id) {
+            $peserta->update([
+                'ujian_id'   => $ujian->id,
+                'list_soal'  => null, // Reset soal lama agar ambil soal baru
+                'started_at' => now(), // Reset waktu mulai untuk ujian baru
+            ]);
+
+            // Refresh data peserta setelah update
+            $peserta->refresh();
+        }
+
+        // $peserta->update([
+        //     'ujian_id'   => $request->ujian_id,
+        //     'started_at' => $peserta->started_at ?? now(),
+        // ]);
 
         if (!$peserta->list_soal) {
             // PERBAIKAN: Gunakan $ujian->bank_soal_id
@@ -123,9 +152,10 @@ class UjianSiswaController extends Controller
             // Alihkan ke halaman 404 Standard Laravel
             abort(404);
         }
-
         // Ambil data peserta beserta relasi ujian dan jawaban yang sudah ada
         $peserta = Peserta::with(['ujian', 'jawaban'])->findOrFail($id);
+
+        $ujian = $peserta->ujian;
 
         $startTime = $peserta->started_at ?? now();
         $waktuSelesai = $startTime->addMinutes($peserta->ujian->durasi_menit)->timestamp;
@@ -166,7 +196,7 @@ class UjianSiswaController extends Controller
             })->toArray();
 
 
-        return view('ujian.soal', compact('peserta', 'soals', 'waktuSelesai', 'jawabanTerarsip'));
+        return view('ujian.soal', compact('peserta', 'soals', 'waktuSelesai', 'jawabanTerarsip', 'ujian'));
     }
 
     public function autosave(Request $request)
@@ -202,7 +232,10 @@ class UjianSiswaController extends Controller
     public function submit(Request $request)
     {
         // 1. Validasi awal: Mencegah Double Submit
-        $sudahAdaNilai = Nilai::where('peserta_id', $request->peserta_id)->exists();
+        $sudahAdaNilai = Nilai::where('peserta_id', $request->peserta_id)
+            ->where('ujian_id', $request->ujian_id)
+            ->exists();
+
         if ($sudahAdaNilai) {
             return redirect()->route('ujian.selesai');
         }
@@ -232,6 +265,7 @@ class UjianSiswaController extends Controller
                 $dataJawaban[] = [
                     'peserta_id' => $request->peserta_id,
                     'soal_id'    => $soal_id,
+                    'ujian_id'   => $request->ujian_id,
                     'jawaban'    => json_encode($jawabanSiswa),
                     'skor'       => $skor,
                     'created_at' => now(),
@@ -245,10 +279,16 @@ class UjianSiswaController extends Controller
             }
 
             // 5. Simpan Nilai Akhir
-            Nilai::create([
-                'peserta_id' => $request->peserta_id,
-                'total_skor' => $totalSkor,
-            ]);
+            Nilai::updateOrCreate(
+                [
+                    'peserta_id' => $request->peserta_id,
+                    'ujian_id'   => $request->ujian_id,
+                ],
+                [
+                    'total_skor' => $totalSkor,
+                    'update_at' => now(),
+                ]
+            );
 
             DB::commit();
             return redirect()->route('ujian.selesai');

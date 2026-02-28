@@ -192,12 +192,12 @@ class UjianResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->button(),
-                Tables\Actions\DeleteAction::make()->button(),
+                //Tables\Actions\DeleteAction::make()->button(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     //Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 
