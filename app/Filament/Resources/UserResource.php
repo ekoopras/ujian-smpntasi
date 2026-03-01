@@ -44,13 +44,13 @@ class UserResource extends Resource
                     ->relationship('mapel', 'mapel') // lebih bagus pakai relationship
                     ->multiple()
                     ->preload()
-                    ->searchable()
-                    ->required(),
+                    ->searchable(),
 
                 Forms\Components\Select::make('role')
                     ->options([
                         'super_admin' => 'Super Admin',
                         'guru' => 'Guru',
+                        'pengawas' => 'Pengawas',
                     ])
                     ->required(),
             ]);

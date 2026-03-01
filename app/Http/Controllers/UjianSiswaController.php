@@ -146,14 +146,16 @@ class UjianSiswaController extends Controller
 
     public function soal($id)
     {
-        // PROTEKSI: Cek apakah ID di URL sama dengan ID di Session login
         // Cek apakah peserta_id di session cocok dengan ID di URL
         if (session('peserta_id') != $id) {
-            // Alihkan ke halaman 404 Standard Laravel
             abort(404);
         }
+
         // Ambil data peserta beserta relasi ujian dan jawaban yang sudah ada
         $peserta = Peserta::with(['ujian', 'jawaban'])->findOrFail($id);
+
+        // --- TAMBAHKAN PROTEKSI LOCK DI SINI ---
+        $is_locked = $peserta->is_locked;
 
         $ujian = $peserta->ujian;
 
@@ -196,7 +198,7 @@ class UjianSiswaController extends Controller
             })->toArray();
 
 
-        return view('ujian.soal', compact('peserta', 'soals', 'waktuSelesai', 'jawabanTerarsip', 'ujian'));
+        return view('ujian.soal', compact('peserta', 'soals', 'waktuSelesai', 'jawabanTerarsip', 'ujian', 'is_locked'));
     }
 
     public function autosave(Request $request)

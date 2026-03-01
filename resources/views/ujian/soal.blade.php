@@ -197,15 +197,16 @@
             <div id="lockScreen" class="lock-screen" style="display: none;">
                 <div class="lock-box">
                     <h4>UJIAN TERKUNCI 🔒</h4>
-                    <p>Anda meninggalkan halaman ujian</p>
+                    <p>Kamu Terdeteksi Meninggalkan Halaman Ujian</p>
+                    <p style="font-size: 10px">Untuk Membukanya Silahkan Konfirmasi Ke Pengawas Ujian</p>
 
-                    <input type="password" id="unlockCode" maxlength="6" class="form-control text-center my-3"
+                    {{-- <input type="password" id="unlockCode" maxlength="6" class="form-control text-center my-3"
                         placeholder="Kode 6 Digit" autocomplete="off" autocorrect="off" spellcheck="false"
-                        onkeypress="handleUnlockKey(event)">
+                        onkeypress="handleUnlockKey(event)"> --}}
 
                     <div id="msgError" class="text-danger mb-3" style="display:none; font-weight:bold;"></div>
 
-                    <button type="button" class="btn btn-primary w-100" onclick="unlockUjian()">
+                    <button type="button" class="btn btn-primary w-100" onclick="reloadPage()">
                         Buka Kunci
                     </button>
                 </div>
@@ -525,7 +526,15 @@
         }
 
         // 2. Logika Deteksi Pelanggaran
-        var ujianLocked = false;
+        //var ujianLocked = false;
+        var ujianLocked = {{ $is_locked ? 'true' : 'false' }};
+
+        // Tambahkan ini tepat di bawah variabel ujianLocked
+        document.addEventListener("DOMContentLoaded", function() {
+            if (ujianLocked) {
+                showLockScreen();
+            }
+        });
 
         document.addEventListener("visibilitychange", function() {
             if (document.hidden) {
@@ -546,7 +555,7 @@
                 method: "POST",
                 headers: {
                     "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     peserta_id: {{ $peserta->id }}
@@ -566,40 +575,46 @@
             }
         }
 
-        function unlockUjian() {
-            var input = document.getElementById('unlockCode');
-            var code = input.value;
-
-            if (code === "") {
-                alert("Masukkan kode!");
-                return;
-            }
-
-            fetch("/ujian/unlock", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({
-                        peserta_id: {{ $peserta->id }},
-                        code: code
-                    })
-                })
-                .then(function(res) {
-                    if (res.status === 200) {
-                        ujianLocked = false;
-                        input.value = "";
-                        document.getElementById('lockScreen').style.display = 'none';
-                    } else {
-                        input.value = "";
-                        alert("Kode Salah!");
-                    }
-                })
-                .catch(function(err) {
-                    alert("Gagal terhubung ke server. Cek koneksi!");
-                });
+        function reloadPage() {
+            location.reload();
         }
+
+        // function unlockUjian() {
+        //     var input = document.getElementById('unlockCode');
+        //     var code = input.value;
+
+        //     if (code === "") {
+        //         alert("Masukkan kode!");
+        //         return;
+        //     }
+
+        //     fetch("/ujian/unlock", {
+        //             method: "POST",
+        //             headers: {
+        //                 "Content-Type": "application/json",
+        //                 "Accept": "application/json",
+        //                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
+        //             },
+        //             body: JSON.stringify({
+        //                 peserta_id: {{ $peserta->id }},
+        //                 code: code
+        //             })
+        //         })
+        //         .then(function(res) {
+        //             if (res.status === 200) {
+        //                 ujianLocked = false;
+        //                 input.value = "";
+        //                 document.getElementById('lockScreen').style.display = 'none';
+        //                 window.location.reload();
+        //             } else {
+        //                 input.value = "";
+        //                 alert("Kode Salah!");
+        //             }
+        //         })
+        //         .catch(function(err) {
+        //             alert("Gagal terhubung ke server. Cek koneksi!");
+        //         });
+        // }
     </script>
 
     <script>
