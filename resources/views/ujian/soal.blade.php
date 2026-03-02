@@ -197,16 +197,15 @@
             <div id="lockScreen" class="lock-screen" style="display: none;">
                 <div class="lock-box">
                     <h4>UJIAN TERKUNCI 🔒</h4>
-                    <p>Kamu Terdeteksi Meninggalkan Halaman Ujian</p>
-                    <p style="font-size: 10px">Untuk Membukanya Silahkan Konfirmasi Ke Pengawas Ujian</p>
+                    <p>Anda meninggalkan halaman ujian</p>
 
-                    {{-- <input type="password" id="unlockCode" maxlength="6" class="form-control text-center my-3"
+                    <input type="password" id="unlockCode" maxlength="6" class="form-control text-center my-3"
                         placeholder="Kode 6 Digit" autocomplete="off" autocorrect="off" spellcheck="false"
-                        onkeypress="handleUnlockKey(event)"> --}}
+                        onkeypress="handleUnlockKey(event)">
 
                     <div id="msgError" class="text-danger mb-3" style="display:none; font-weight:bold;"></div>
 
-                    <button type="button" class="btn btn-primary w-100" onclick="reloadPage()">
+                    <button type="button" class="btn btn-primary w-100" onclick="unlockUjian()">
                         Buka Kunci
                     </button>
                 </div>
@@ -517,7 +516,7 @@
         }
     </script>
 
-    <script>
+    {{-- <script>
         // ---- JS LOCK UJIAN ----- ///
         // 1. Fungsi menampilkan lock screen (Gunakan .style agar lebih stabil)
         function showLockScreen() {
@@ -575,46 +574,161 @@
             }
         }
 
-        function reloadPage() {
-            location.reload();
+        function unlockUjian() {
+            var input = document.getElementById('unlockCode');
+            var code = input.value;
+
+            if (code === "") {
+                alert("Masukkan kode!");
+                return;
+            }
+
+            fetch("/ujian/unlock", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    },
+                    body: JSON.stringify({
+                        peserta_id: {{ $peserta->id }},
+                        code: code
+                    })
+                })
+                .then(function(res) {
+                    if (res.ok) { // res.ok mencakup status 200-299
+                        return res.json();
+                    } else {
+                        throw new Error("Gagal");
+                    }
+                })
+                .then(function(data) {
+                    // Jika sampai sini, berarti PIN BENAR
+                    ujianLocked = false;
+                    document.getElementById('unlockCode').value = "";
+                    document.getElementById('lockScreen').style.display = 'none';
+
+                    // Reload halaman agar is_locked yang 0 dari DB terbaca oleh Laravel
+                    window.location.reload();
+                })
+                .catch(function(err) {
+                    document.getElementById('unlockCode').value = "";
+                    alert("Kode Salah atau Gagal Terhubung!");
+                });
+        }
+    </script> --}}
+
+    <script>
+        // 1. Inisialisasi Status dari Laravel
+        var ujianLocked = {{ $is_locked ? 'true' : 'false' }};
+        var isExiting = false; // Flag untuk mendeteksi refresh agar tidak re-lock
+
+        // 2. Fungsi Menampilkan Overlay Lock
+        function showLockScreen() {
+            var ls = document.getElementById('lockScreen');
+            if (ls) ls.style.display = 'block';
         }
 
-        // function unlockUjian() {
-        //     var input = document.getElementById('unlockCode');
-        //     var code = input.value;
+        // 3. Deteksi Jika Halaman Sedang Reload (F5) atau Berpindah
+        window.addEventListener('beforeunload', function() {
+            isExiting = true;
+        });
 
-        //     if (code === "") {
-        //         alert("Masukkan kode!");
-        //         return;
-        //     }
+        // 4. Jalankan Lock Screen jika status dari DB adalah Locked
+        document.addEventListener("DOMContentLoaded", function() {
+            if (ujianLocked) {
+                showLockScreen();
+            }
+        });
 
-        //     fetch("/ujian/unlock", {
-        //             method: "POST",
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //                 "Accept": "application/json",
-        //                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
-        //             },
-        //             body: JSON.stringify({
-        //                 peserta_id: {{ $peserta->id }},
-        //                 code: code
-        //             })
-        //         })
-        //         .then(function(res) {
-        //             if (res.status === 200) {
-        //                 ujianLocked = false;
-        //                 input.value = "";
-        //                 document.getElementById('lockScreen').style.display = 'none';
-        //                 window.location.reload();
-        //             } else {
-        //                 input.value = "";
-        //                 alert("Kode Salah!");
-        //             }
-        //         })
-        //         .catch(function(err) {
-        //             alert("Gagal terhubung ke server. Cek koneksi!");
-        //         });
-        // }
+        // 5. Fungsi Mengunci Ujian (Kirim ke Server)
+        function lockUjian() {
+            // JANGAN LOCK jika: sedang proses refresh (isExiting) atau sudah terkunci
+            if (isExiting || ujianLocked) return;
+
+            ujianLocked = true;
+
+            fetch("/ujian/lock", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    peserta_id: {{ $peserta->id }}
+                })
+            });
+
+            showLockScreen();
+        }
+
+        // 6. Listener Deteksi Kecurangan (Pindah Tab/Minimize)
+        // Diberi delay 300ms untuk memastikan ini bukan proses Refresh
+        window.addEventListener("blur", function() {
+            setTimeout(function() {
+                if (!isExiting) lockUjian();
+            }, 300);
+        });
+
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                setTimeout(function() {
+                    if (!isExiting) lockUjian();
+                }, 300);
+            }
+        });
+
+        // 7. Fungsi Menangani Tombol ENTER pada input PIN
+        function handleUnlockKey(e) {
+            var key = e.keyCode || e.which;
+            if (key === 13) {
+                if (e.preventDefault) e.preventDefault();
+                unlockUjian();
+                return false;
+            }
+        }
+
+        // 8. Fungsi Buka Kunci (Unlock)
+        function unlockUjian() {
+            var input = document.getElementById('unlockCode');
+            var code = input.value;
+
+            if (code === "") {
+                alert("Masukkan kode!");
+                return;
+            }
+
+            fetch("/ujian/unlock", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    },
+                    body: JSON.stringify({
+                        peserta_id: {{ $peserta->id }},
+                        code: code
+                    })
+                })
+                .then(function(res) {
+                    if (res.status === 200) {
+                        // Berhasil Unlock!
+                        isExiting = true; // Tandai agar saat reload tidak kena lock lagi
+                        ujianLocked = false;
+                        input.value = "";
+                        document.getElementById('lockScreen').style.display = 'none';
+
+                        // Reload halaman untuk sinkronisasi data soal
+                        window.location.reload();
+                    } else {
+                        input.value = "";
+                        alert("Kode Salah!");
+                    }
+                })
+                .catch(function(err) {
+                    alert("Gagal terhubung ke server. Cek koneksi!");
+                });
+        }
     </script>
 
     <script>

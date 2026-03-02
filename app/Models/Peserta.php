@@ -13,6 +13,8 @@ class Peserta extends Model
         'ujian_id',
         'started_at',
         'list_soal',
+        'is_locked',
+        'tab_violation',
     ];
 
     protected $casts = [
