@@ -159,8 +159,19 @@ class UjianSiswaController extends Controller
 
         $ujian = $peserta->ujian;
 
-        $startTime = $peserta->started_at ?? now();
-        $waktuSelesai = $startTime->addMinutes($peserta->ujian->durasi_menit)->timestamp;
+        // $startTime = $peserta->started_at ?? now();
+        // $waktuSelesai = $startTime->addMinutes($peserta->ujian->durasi_menit)->timestamp;
+
+        // 1. Pastikan started_at tersimpan di DB agar waktu tidak reset saat refresh
+        if (!$peserta->started_at) {
+            $peserta->started_at = now();
+            $peserta->save();
+        }
+
+        // 2. Gunakan copy() agar objek asli started_at tidak berubah saat ditambah menit
+        $waktuSelesai = $peserta->started_at->copy()
+            ->addMinutes((int) $peserta->ujian->durasi_menit)
+            ->timestamp;
 
         // CEK AMAN: Jika list_soal kosong (karena peserta lama atau gagal generate), buatkan sekarang
         if (empty($peserta->list_soal)) {

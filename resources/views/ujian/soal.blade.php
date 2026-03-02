@@ -416,15 +416,22 @@
             }
 
             // 4. Hitung menit dan detik secara manual
+            // var menit = Math.floor((sisaWaktu % (1000 * 60 * 60)) / (1000 * 60));
+            // var detik = Math.floor((sisaWaktu % (1000 * 60)) / 1000);
+            var jam = Math.floor(sisaWaktu / (1000 * 60 * 60));
             var menit = Math.floor((sisaWaktu % (1000 * 60 * 60)) / (1000 * 60));
             var detik = Math.floor((sisaWaktu % (1000 * 60)) / 1000);
 
             // 5. Format 00:00 (Browser lama tidak dukung .padStart)
+            // var tampilMenit = menit < 10 ? "0" + menit : menit;
+            // var tampilDetik = detik < 10 ? "0" + detik : detik;
+            var tampilJam = jam > 0 ? (jam < 10 ? "0" + jam : jam) + ":" : "";
             var tampilMenit = menit < 10 ? "0" + menit : menit;
             var tampilDetik = detik < 10 ? "0" + detik : detik;
 
             // 6. Update tampilan
-            document.getElementById('timerText').innerHTML = tampilMenit + ":" + tampilDetik;
+            // document.getElementById('timerText').innerHTML = tampilMenit + ":" + tampilDetik;
+            document.getElementById('timerText').innerHTML = tampilJam + tampilMenit + ":" + tampilDetik;
         }
 
         // Jalankan setiap 1 detik
