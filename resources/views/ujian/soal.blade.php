@@ -17,12 +17,15 @@
                 <div class="container-fluid">
                     <div class="row align-items-center">
 
-                        <div class="col-6 col-md-4 d-flex align-items-center gap-2">
-                            <div class="logo-circle d-flex align-items-center justify-content-center">
+                        <div class="col-6 col-md-4 d-flex gap-2">
+                            <div class="logo-circle d-flex align-items-center">
                                 {{-- <i class="bi bi-mortarboard-fill fs-4"></i> --}}
-                                <img src="{{ asset('ico.png') }}" alt="UjianApp" style="width: 4rem">
+                                <img src="{{ asset('new-logo-ujian.jpg') }}" alt="UjianApp"
+                                    style="width: 10rem;border-radius: 10px;">
                             </div>
                         </div>
+
+
 
                         <div class="col-6 col-md-4 text-end ms-auto">
                             <div class="fw-semibold">{{ $peserta->nama }}</div>
@@ -260,12 +263,10 @@
                     </div>
 
                     <div class="col-3 col-lg-4 " id="submitWrapper">
-                        <button type="submit" class="btn btn-success w-100 fw-semibold">
+                        <button type="button" class="btn btn-success w-100 fw-semibold" onclick="konfirmasiSelesai()">
                             Selesai
                         </button>
                     </div>
-
-
 
                     <div class="col-3 d-lg-none">
                         <button type="button" class="btn btn-primary w-100" onclick="bukaMenuNomor()">
@@ -284,6 +285,30 @@
         </div>
 
     </form>
+
+    <div class="modal fade" id="modalKonfirmasi" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-exclamation-circle text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold">Akhiri Ujian?</h5>
+                    <p class="text-muted">Pastikan semua jawaban telah terisi dengan benar. Anda tidak dapat kembali
+                        setelah menekan tombol Selesai.</p>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="button" class="btn btn-success py-2 fw-bold" onclick="submitFormUjian()">
+                            Ya, Selesai
+                        </button>
+                        <button type="button" class="btn btn-danger py-2" data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {{-- STYLE --}}
     <style>
@@ -858,6 +883,23 @@
 
             if (nWrap) nWrap.style.display = isLast ? 'none' : 'block';
             if (sWrap) sWrap.style.display = !isLast ? 'none' : 'block';
+        }
+
+        // Fungsi untuk memunculkan modal
+        function konfirmasiSelesai() {
+            var myModal = new bootstrap.Modal(document.getElementById('modalKonfirmasi'));
+            myModal.show();
+        }
+
+        // Fungsi untuk mengirim form yang sebenarnya
+        function submitFormUjian() {
+            // Tampilkan loading di tombol agar tidak diklik dua kali
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Mengirim...';
+
+            // Kirim form ID formUjian
+            document.getElementById('formUjian').submit();
         }
 
         function nextSoal() {

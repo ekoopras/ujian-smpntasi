@@ -14,8 +14,8 @@
                         {{-- Icon --}}
                         <div class="text-center mb-2">
                             <div class="d-inline-flex align-items-center justify-content-center">
-                                <img src="{{ asset('ico.png') }}" alt="UjianApp"
-                                    style="width:100px;box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);border-radius: 20px;">
+                                <img src="{{ asset('new-logo-ujian.jpg') }}" alt="UjianApp"
+                                    style="width:250px;box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);border-radius: 10px;">
                                 {{-- <i class="bi bi-mortarboard-fill fs-3"></i> --}}
                             </div>
                         </div>
