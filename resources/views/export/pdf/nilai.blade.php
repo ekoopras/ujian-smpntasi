@@ -47,7 +47,7 @@
                     <td>{{ $nilai->peserta->nama }}</td>
                     <td>{{ $nilai->peserta->nomor_absen }}</td>
                     <td>{{ $nilai->peserta->kelase->kelas }}</td>
-                    <td>{{ $nilai->peserta->ujian->mapel->mapel }}</td>
+                    <td>{{ $nilai->ujian->mapel->mapel ?? '-' }}</td>
                     <td>{{ $nilai->total_skor }}</td>
                 </tr>
             @endforeach

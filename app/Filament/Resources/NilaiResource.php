@@ -39,6 +39,7 @@ class NilaiResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('peserta.nomor_absen', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('peserta.nomor_absen')
                     ->label('Nomor Absen')
@@ -84,11 +85,25 @@ class NilaiResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('success')
                     ->action(function ($livewire) {
+                        // 1. Ambil query dasar dari tabel yang sudah difilter
                         $query = $livewire->getFilteredTableQuery();
 
+                        // 2. Ambil baris pertama (Gunakan clone agar query utama tidak terganggu)
+                        // Kita butuh with() agar relasi peserta dan ujian terambil
+                        $firstRow = (clone $query)->with(['peserta.kelase', 'ujian.mapel'])->first();
+
+                        // 3. Tentukan Nama File (Default jika data kosong)
+                        $mapel = $firstRow->ujian->mapel->mapel ?? 'Semua_Mapel';
+                        $kelas = $firstRow->peserta->kelase->kelas ?? 'Semua_Kelas';
+
+                        // Gunakan Str::slug agar karakter seperti "/" atau spasi tidak merusak file
+                        $cleanName = \Illuminate\Support\Str::slug("Rekap_{$mapel}_{$kelas}", '_');
+                        $fileName = $cleanName . '.xlsx';
+
+                        // 4. Jalankan Download menggunakan NilaiExport
                         return Excel::download(
                             new NilaiExport($query),
-                            'nilai.xlsx'
+                            $fileName
                         );
                     }),
 
@@ -96,15 +111,28 @@ class NilaiResource extends Resource
                     ->label('Export PDF')
                     ->icon('heroicon-o-document')
                     ->action(function ($livewire) {
-                        $data = $livewire
-                            ->getFilteredTableQuery()
+                        $data = $livewire->getFilteredTableQuery()
+                            ->join('pesertas', 'nilais.peserta_id', '=', 'pesertas.id')
+                            ->orderBy('pesertas.nomor_absen', 'asc')
+                            ->select('nilais.*')
+                            ->with(['peserta.kelase', 'ujian.mapel'])
                             ->get();
+
+                        // Ambil data pertama untuk nama file
+                        $firstItem = $data->first();
+
+                        // Buat format nama file: Rekap_Matematika_XI-IPA-1.pdf
+                        // Gunakan Str::slug agar nama file aman dari karakter aneh/spasi
+                        $mapel = $firstItem->ujian->mapel->mapel ?? 'Mapel';
+                        $kelas = $firstItem->peserta->kelase->kelas ?? 'Kelas';
+                        $fileName = "Rekap_{$mapel}_{$kelas}";
+                        $fileName = \Illuminate\Support\Str::slug($fileName, '_') . '.pdf';
 
                         return response()->streamDownload(function () use ($data) {
                             echo Pdf::loadView('export.pdf.nilai', [
                                 'data' => $data
                             ])->output();
-                        }, 'nilai.pdf');
+                        }, $fileName);
                     }),
             ])
             ->paginated([50])
