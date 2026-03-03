@@ -43,6 +43,7 @@ class NilaiResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('peserta.nomor_absen')
                     ->label('Nomor Absen')
+                    ->alignment(Alignment::Center)
                     ->searchable()
                     ->sortable(),
 
@@ -142,8 +143,10 @@ class NilaiResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn() => auth()->user()->isSuperAdmin()),
                 ]),
+
             ]);
     }
 
