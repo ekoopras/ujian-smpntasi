@@ -11,6 +11,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -39,23 +40,30 @@ class NilaiResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('peserta.nomor_absen')
+                    ->label('Nomor Absen')
+                    ->searchable()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('peserta.nama')
                     ->label('Nama Siswa')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('peserta.nomor_absen')
-                    ->label('Nomor Absen'),
-
                 Tables\Columns\TextColumn::make('peserta.kelase.kelas')
                     ->label('Kelas')
+                    ->alignment(Alignment::Center)
+                    ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('ujian.mapel.mapel')
                     ->label('Ujian')
+                    ->alignment(Alignment::Center)
+                    ->searchable()
                     ->wrap(),
 
                 Tables\Columns\TextColumn::make('total_skor')
                     ->label('Nilai')
+                    ->alignment(Alignment::Center)
                     ->badge()
                     ->color(fn($state) => $state >= 75 ? 'success' : 'danger')
                     ->sortable(),
@@ -99,6 +107,8 @@ class NilaiResource extends Resource
                         }, 'nilai.pdf');
                     }),
             ])
+            ->paginated([50])
+            //->defaultPaginationPageOption(50)
             ->actions([
                 //Tables\Actions\EditAction::make(),
             ])
@@ -120,8 +130,8 @@ class NilaiResource extends Resource
     {
         return [
             'index' => Pages\ListNilais::route('/'),
-            'create' => Pages\CreateNilai::route('/create'),
-            'edit' => Pages\EditNilai::route('/{record}/edit'),
+            //'create' => Pages\CreateNilai::route('/create'),
+            //'edit' => Pages\EditNilai::route('/{record}/edit'),
         ];
     }
 

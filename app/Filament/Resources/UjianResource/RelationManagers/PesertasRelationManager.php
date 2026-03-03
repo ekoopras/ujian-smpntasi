@@ -51,12 +51,12 @@ class PesertasRelationManager extends RelationManager
             //     Tables\Actions\CreateAction::make(),
             // ])
             ->actions([
-                Tables\Actions\DeleteAction::make()->button(),
+                //Tables\Actions\DeleteAction::make()->button(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                //Tables\Actions\BulkActionGroup::make([
+                //Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ])
         ;
     }
