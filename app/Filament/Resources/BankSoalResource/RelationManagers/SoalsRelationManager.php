@@ -16,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -174,15 +175,20 @@ class SoalsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('no')
                     ->label('No')
                     ->rowIndex(),
+
                 TextColumn::make('soal')
                     ->label('Soal')
                     ->limit(50)
                     ->wrap(),
+
                 TextColumn::make('tipe_soal')
-                    ->label('Tipe Soal'),
+                    ->label('Tipe Soal')
+                    ->alignment(Alignment::Center),
+
                 TextColumn::make('kunci_jawaban')
                     ->label('Kunci Jawaban')
                     ->badge()
+                    ->alignment(Alignment::Center)
                     ->state(function ($record) {
 
                         /* ===============================
@@ -210,6 +216,7 @@ class SoalsRelationManager extends RelationManager
                 TextColumn::make('skor')
                     ->label('Skor')
                     ->badge()
+                    ->alignment(Alignment::Center)
                     ->state(function ($record) {
                         // MULTIPLE CHOICE
                         if ($record->tipe_soal === 'multiple_choice') {
@@ -274,12 +281,12 @@ class SoalsRelationManager extends RelationManager
                 Tables\Actions\EditAction::make()
                     ->modalHeading(null) // 🔥 INI KUNCI,
                     ->button(),
-                Tables\Actions\DeleteAction::make()->button(),
+                //Tables\Actions\DeleteAction::make()->button(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 }

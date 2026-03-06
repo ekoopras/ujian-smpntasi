@@ -139,7 +139,7 @@ class NilaiResource extends Resource
             ->paginated([50])
             //->defaultPaginationPageOption(50)
             ->actions([
-                //Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->label('View Jawaban')->button(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -153,7 +153,7 @@ class NilaiResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\JawabansRelationManager::class,
         ];
     }
 
@@ -162,7 +162,7 @@ class NilaiResource extends Resource
         return [
             'index' => Pages\ListNilais::route('/'),
             //'create' => Pages\CreateNilai::route('/create'),
-            //'edit' => Pages\EditNilai::route('/{record}/edit'),
+            'edit' => Pages\EditNilai::route('/{record}/edit'),
         ];
     }
 

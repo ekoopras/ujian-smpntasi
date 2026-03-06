@@ -10,6 +10,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -84,18 +85,26 @@ class BankSoalResource extends Resource
                     ->label('Mapel')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('kelas'),
-                Tables\Columns\TextColumn::make('semester'),
+
+                Tables\Columns\TextColumn::make('kelas')
+                    ->alignment(Alignment::Center),
+
+                Tables\Columns\TextColumn::make('semester')
+                    ->alignment(Alignment::Center),
+
                 Tables\Columns\TextColumn::make('soals_count')
                     ->label('Jumlah Soal')
                     ->counts('soals') // otomatis hitung relasi
                     ->sortable()
                     ->badge()
+                    ->alignment(Alignment::Center)
                     ->color(fn(int $state): string => $state > 0 ? 'success' : 'secondary'),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -112,13 +121,13 @@ class BankSoalResource extends Resource
                     ->icon('heroicon-o-document-magnifying-glass')
                     ->color('success')
                     ->url(fn(BankSoal $record): string => static::getUrl('review', ['record' => $record->id])),
-                Tables\Actions\DeleteAction::make()->button(),
+                //Tables\Actions\DeleteAction::make()->button(),
 
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 

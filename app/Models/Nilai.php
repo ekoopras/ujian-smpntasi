@@ -21,4 +21,10 @@ class Nilai extends Model
     {
         return $this->belongsTo(Ujian::class);
     }
+
+    public function jawabans()
+    {
+        return $this->hasMany(Jawaban::class, 'peserta_id', 'peserta_id')
+            ->where('ujian_id', $this->ujian_id);
+    }
 }

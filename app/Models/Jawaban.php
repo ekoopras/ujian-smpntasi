@@ -13,4 +13,11 @@ class Jawaban extends Model
         'jawaban',
         'skor'
     ];
+
+    // app/Models/Jawaban.php
+    public function soal()
+    {
+        // Pastikan nama modelnya 'Soal' (sesuai nama tabel soals)
+        return $this->belongsTo(Soal::class, 'soal_id');
+    }
 }

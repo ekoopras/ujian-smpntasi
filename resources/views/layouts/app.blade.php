@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" translate="no">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="google" content="notranslate">
     <title>UjianApp</title>
     <link rel="icon" href="{{ asset('ico.png') }}" type="image/png">
 
@@ -26,19 +27,25 @@
     <link rel="manifest" href="{{ asset('/manifest.json') }}">
 </head>
 
-<body>
+<body class="notranslate">
 
     <style>
         body {
             font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont,
                 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
+
+        .notranslate {
+            translate: no;
+        }
     </style>
 
     <!-- main-content  -->
-    <main class="w-full min-h-screen">
-        @yield('content')
-    </main>
+    <div class="soal notranslate">
+        <main class="w-full min-h-screen">
+            @yield('content')
+        </main>
+    </div>
 
     <!-- asset-js  -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
